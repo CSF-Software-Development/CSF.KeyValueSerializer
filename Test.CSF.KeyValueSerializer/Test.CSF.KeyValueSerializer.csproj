@@ -10,7 +10,7 @@
     <RootNamespace>Test.CSF.KeyValueSerializer</RootNamespace>
     <AssemblyName>Test.CSF.KeyValueSerializer</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <ReleaseVersion>2.5.1</ReleaseVersion>
+    <ReleaseVersion>2.5.2</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
