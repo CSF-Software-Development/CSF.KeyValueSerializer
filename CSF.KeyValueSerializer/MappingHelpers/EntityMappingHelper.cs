@@ -82,7 +82,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     public EntityMappingHelper(ISimpleMapping<TEntity> mapping) : base(mapping) 
     {
       this.Mapping.DeserializationFunction = null;
-      this.Mapping.SerializationFunction = x => x.GetIdentity().Value.ToString();
+      this.Mapping.SerializationFunction = x => x.Id.ToString();
     }
 
     #endregion
