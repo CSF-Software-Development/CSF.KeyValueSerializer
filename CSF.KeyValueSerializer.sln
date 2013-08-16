@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.CSF.KeyValueSerializer", "Test.CSF.KeyValueSerializer\Test.CSF.KeyValueSerializer.csproj", "{11DCF35A-6E2A-4C62-B536-14B83FF5AE07}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{7B12E9AF-526D-4F1F-93E4-B1AB5AA9AA89}"
@@ -50,6 +50,6 @@ Global
 		$1.inheritsSet = VisualStudio
 		$1.inheritsScope = text/plain
 		$1.scope = text/plain
-		version = 2.5.2
+		version = 3.0.0
 	EndGlobalSection
 EndGlobal

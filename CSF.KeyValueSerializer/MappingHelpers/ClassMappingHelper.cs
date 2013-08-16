@@ -108,24 +108,6 @@ namespace CSF.KeyValueSerializer.MappingHelpers
       return new CompositeMappingHelper<TObject, TObject>((ICompositeMapping<TObject>) this.Mapping.MapAs);
     }
 
-    /// <summary>
-    /// Maps the class as a special case of the <c>Value&lt;TValue&gt;()</c> mapping - in which the value within the
-    /// collection is parsed as an <see cref="CSF.Entities.IIdentity"/> and unwrapped as an entity instance.
-    /// </summary>
-    /// <typeparam name='TEntity'>
-    /// The entity-type for the current instance.
-    /// </typeparam>
-    /// <typeparam name='TIdentity'>
-    /// The identity-type for the current instance.
-    /// </typeparam>
-    public IEntityMappingHelper<TObject, TEntity, TIdentity> Entity<TEntity, TIdentity>()
-      where TEntity : IEntity
-    {
-      this.Mapping.MapAs = new SimpleMapping<TEntity>(this.Mapping, null);
-
-      return new EntityMappingHelper<TObject, TEntity, TIdentity>((ISimpleMapping<TEntity>) this.Mapping.MapAs);
-    }
-
     #endregion
 
     #region adding mappings
@@ -263,35 +245,6 @@ namespace CSF.KeyValueSerializer.MappingHelpers
       }
 
       mapping(new ClassMappingHelper<TClass>(baseMapping));
-    }
-
-    /// <summary>
-    /// Maps a property of the class as a special case of the <c>Value&lt;TValue&gt;()</c> mapping - in which the value
-    /// within the collection is parsed as an <see cref="CSF.Entities.IIdentity"/> and unwrapped as an entity instance.
-    /// </summary>
-    /// <param name='property'>
-    /// An expression indicating the property to be mapped.
-    /// </param>
-    /// <typeparam name='TEntity'>
-    /// The entity-type for the current instance.
-    /// </typeparam>
-    /// <typeparam name='TIdentity'>
-    /// The identity-type for the current instance.
-    /// </typeparam>
-    public IEntityMappingHelper<TObject, TEntity, TIdentity> Entity<TEntity, TIdentity>(Expression<Func<TObject, IEntity<TEntity, TIdentity>>> property)
-      where TEntity : IEntity
-    {
-      ISimpleMapping<TEntity> mapping;
-      PropertyInfo prop = Reflect.Property<TObject,IEntity<TEntity, TIdentity>>(property);
-
-      mapping = (ISimpleMapping<TEntity>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
-      if(mapping == null)
-      {
-        mapping = new SimpleMapping<TEntity>(this.Mapping, prop);
-        this.Mapping.Mappings.Add(mapping);
-      }
-
-      return new EntityMappingHelper<TObject, TEntity, TIdentity>(mapping);
     }
 
     #endregion

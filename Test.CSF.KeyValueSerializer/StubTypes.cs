@@ -99,5 +99,14 @@ namespace Test.CSF.KeyValueSerializer
 
     public int Friends { get; set; }
   }
+
+  public enum SampleEnum
+  {
+    One,
+
+    Two,
+
+    Three
+  }
 }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -9,9 +9,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>CSF.KeyValueSerializer</RootNamespace>
     <AssemblyName>CSF.KeyValueSerializer</AssemblyName>
-    <ReleaseVersion>2.5.2</ReleaseVersion>
+    <ReleaseVersion>3.0.0</ReleaseVersion>
     <newfilesearch>OnLoad</newfilesearch>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -56,7 +55,6 @@
     <Compile Include="MappingHelpers\IClassMappingHelper`1.cs" />
     <Compile Include="MappingHelpers\ICompositeComponentMappingHelper`2.cs" />
     <Compile Include="MappingHelpers\ICompositeMappingHelper`2.cs" />
-    <Compile Include="MappingHelpers\IEntityMappingHelper`3.cs" />
     <Compile Include="MappingHelpers\IMappingHelper.cs" />
     <Compile Include="MappingHelpers\ISimpleMappingHelper`2.cs" />
     <Compile Include="MappingHelpers\IValueTypeCollectionMappingHelper`2.cs" />
@@ -69,7 +67,6 @@
     <Compile Include="MappingHelpers\ReferenceTypeCollectionMappingHelper.cs" />
     <Compile Include="MappingHelpers\ValueTypeCollectionMappingHelper.cs" />
     <Compile Include="MappingHelpers\CollectionMappingHelper.cs" />
-    <Compile Include="MappingHelpers\EntityMappingHelper.cs" />
     <Compile Include="MappingHelpers\MappingHelper`1.cs" />
     <Compile Include="MappingModel\IMapping.cs" />
     <Compile Include="MappingModel\IKeyNamingPolicy.cs" />
@@ -96,6 +93,7 @@
     <Compile Include="MappingModel\ISimpleMapping.cs" />
     <Compile Include="IKeyValueSerializer`1.cs" />
     <Compile Include="IKeyValueSerializer.cs" />
+    <Compile Include="SimpleMappingHelperExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSF\CSF\CSF.csproj">
