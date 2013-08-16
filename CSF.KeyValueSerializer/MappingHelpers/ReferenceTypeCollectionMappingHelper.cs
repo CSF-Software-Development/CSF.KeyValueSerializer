@@ -155,22 +155,6 @@ namespace CSF.KeyValueSerializer.MappingHelpers
       return this.ChildHelper.Composite();
     }
 
-    /// <summary>
-    /// Maps the class as a special case of the <c>Value&lt;TValue&gt;()</c> mapping - in which the value within the
-    /// collection is parsed as an <see cref="CSF.Entities.IIdentity"/> and unwrapped as an entity instance.
-    /// </summary>
-    /// <typeparam name='TEntity'>
-    /// The entity-type for the current instance.
-    /// </typeparam>
-    /// <typeparam name='TIdentity'>
-    /// The identity-type for the current instance.
-    /// </typeparam>
-    public IEntityMappingHelper<TItem, TEntity, TIdentity> Entity<TEntity, TIdentity>()
-      where TEntity : IEntity
-    {
-      return this.ChildHelper.Entity<TEntity,TIdentity>();
-    }
-
     #endregion
 
     #region adding mappings
@@ -258,25 +242,6 @@ namespace CSF.KeyValueSerializer.MappingHelpers
       where TClass : class
     {
       this.ChildHelper.Class<TClass>(property, mapping);
-    }
-
-    /// <summary>
-    /// Maps a property of the class as a special case of the <c>Value&lt;TValue&gt;()</c> mapping - in which the value
-    /// within the collection is parsed as an <see cref="CSF.Entities.IIdentity"/> and unwrapped as an entity instance.
-    /// </summary>
-    /// <param name='property'>
-    /// An expression indicating the property to be mapped.
-    /// </param>
-    /// <typeparam name='TEntity'>
-    /// The entity-type for the current instance.
-    /// </typeparam>
-    /// <typeparam name='TIdentity'>
-    /// The identity-type for the current instance.
-    /// </typeparam>
-    public IEntityMappingHelper<TItem, TEntity, TIdentity> Entity<TEntity, TIdentity>(Expression<Func<TItem, IEntity<TEntity, TIdentity>>> property)
-      where TEntity : IEntity
-    {
-      return this.ChildHelper.Entity<TEntity, TIdentity>(property);
     }
 
     #endregion
