@@ -96,6 +96,7 @@
     <Compile Include="MappingModel\ISimpleMapping.cs" />
     <Compile Include="IKeyValueSerializer`1.cs" />
     <Compile Include="IKeyValueSerializer.cs" />
+    <Compile Include="SimpleMappingHelperExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSF\CSF\CSF.csproj">

@@ -64,6 +64,7 @@
     <Compile Include="MappingModel\TestCompositeComponentMapping.cs" />
     <Compile Include="MappingModel\TestCompositeMapping.cs" />
     <Compile Include="MappingModel\TestSimpleMapping.cs" />
+    <Compile Include="TestSimpleMappingHelperExtensions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
