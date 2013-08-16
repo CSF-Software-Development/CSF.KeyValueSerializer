@@ -247,49 +247,6 @@ namespace Test.CSF.KeyValueSerializer
     }
 
     [Test]
-    public void TestDeserializeEntity()
-    {
-      var serializer = new ClassKeyValueSerializer<MockClass>();
-
-      serializer.Map(root => {
-        root.Entity(x => x.PropertyFour).Deserialize(s => new Person() { Id = UInt32.Parse(s) });
-      });
-
-      var collection = new Dictionary<string,string>();
-
-      collection.Add("PropertyFour", "2");
-
-      MockClass result = serializer.Deserialize(collection);
-      Assert.IsNotNull(result, "Result not null");
-      Assert.IsNotNull(result.PropertyFour, "Entity not null");
-      Assert.AreEqual(2, result.PropertyFour.GetIdentity().Value, "Identity correct");
-    }
-
-    [Test]
-    public void TestDeserializeEntityCollection()
-    {
-      var serializer = new ClassKeyValueSerializer<MockClass>();
-
-      serializer.Map(root => {
-        root.Collection(x => x.CollectionTwo, c => {
-          c.Entity<Person,uint>().Deserialize(s => new Person() { Id = UInt32.Parse(s) });
-        });
-      });
-
-      var collection = new Dictionary<string,string>();
-
-      collection.Add("CollectionTwo[0]", "1");
-      collection.Add("CollectionTwo[1]", "3");
-
-      MockClass result = serializer.Deserialize(collection);
-      Assert.IsNotNull(result, "Result not null");
-      Assert.IsNotNull(result.CollectionTwo, "Collection not null");
-      Assert.AreEqual(2, result.CollectionTwo.Count, "Collection correct size");
-      Assert.IsTrue(result.CollectionTwo.Any(x => x.Id == 1), "First result present");
-      Assert.IsTrue(result.CollectionTwo.Any(x => x.Id == 3), "Second result present");
-    }
-
-    [Test]
     public void TestDeserializeNestedCollection()
     {
       var serializer = new ClassKeyValueSerializer<Baz>();
@@ -340,30 +297,6 @@ namespace Test.CSF.KeyValueSerializer
                     "2nd Inner collection contains 2011");
       Assert.IsTrue(result.TestCollection.Skip(1).Take(1).First().BazCollection.Any(x => x.BazProperty.Year == 2013),
                     "2nd Inner collection contains 2013");
-    }
-
-    [Test]
-    public void TestDeserializeCommaSeparatedEntityCollection()
-    {
-      var serializer = new ClassKeyValueSerializer<MockClass>();
-
-      serializer.Map(root => {
-        root.Collection(x => x.CollectionTwo, c => {
-          c.CommaSeparatedList();
-          c.Entity<Person,uint>().Deserialize(s => new Person() { Id = UInt32.Parse(s) });
-        });
-      });
-
-      var collection = new Dictionary<string,string>();
-
-      collection.Add("CollectionTwo", "1,3");
-
-      MockClass result = serializer.Deserialize(collection);
-      Assert.IsNotNull(result, "Result not null");
-      Assert.IsNotNull(result.CollectionTwo, "Collection not null");
-      Assert.AreEqual(2, result.CollectionTwo.Count, "Collection correct size");
-      Assert.IsTrue(result.CollectionTwo.Any(x => x.Id == 1), "First result present");
-      Assert.IsTrue(result.CollectionTwo.Any(x => x.Id == 3), "Second result present");
     }
 
     [Test]
@@ -618,46 +551,6 @@ namespace Test.CSF.KeyValueSerializer
     }
 
     [Test]
-    public void TestSerializeEntity()
-    {
-      var serializer = new ClassKeyValueSerializer<MockClass>();
-
-      serializer.Map(root => {
-        root.Entity(x => x.PropertyFour).Deserialize(s => new Person() { Id = UInt32.Parse(s) });
-      });
-
-      var data = new MockClass() { PropertyFour = new Person() { Id = 2 } };
-
-      var result = serializer.Serialize(data);
-
-      Assert.IsTrue(result["PropertyFour"] == "2");
-    }
-
-    [Test]
-    public void TestSerializeEntityCollection()
-    {
-      var serializer = new ClassKeyValueSerializer<MockClass>();
-
-      serializer.Map(root => {
-        root.Collection(x => x.CollectionTwo, c => {
-          c.Entity<Person,uint>().Deserialize(s => new Person() { Id = UInt32.Parse(s) });
-        });
-      });
-
-      var data = new MockClass() {
-        CollectionTwo = new Person[] {
-          new Person() { Id = 1 },
-          new Person() { Id = 3 }
-        }
-      };
-
-      var result = serializer.Serialize(data);
-
-      Assert.IsTrue(result["CollectionTwo[0]"] == "1");
-      Assert.IsTrue(result["CollectionTwo[1]"] == "3");
-    }
-
-    [Test]
     public void TestSerializeNestedCollection()
     {
       var serializer = new ClassKeyValueSerializer<Baz>();
@@ -701,30 +594,6 @@ namespace Test.CSF.KeyValueSerializer
       Assert.IsTrue(result["TestCollection[1].BazCollection[0].BazPropertyMonth"] == "1");
       Assert.IsTrue(result["TestCollection[1].BazCollection[1].BazPropertyYear"] == "2013");
       Assert.IsTrue(result["TestCollection[1].BazCollection[1].BazPropertyMonth"] == "1");
-    }
-
-    [Test]
-    public void TestSerializeCommaSeparatedEntityCollection()
-    {
-      var serializer = new ClassKeyValueSerializer<MockClass>();
-
-      serializer.Map(root => {
-        root.Collection(x => x.CollectionTwo, c => {
-          c.CommaSeparatedList();
-          c.Entity<IPerson,uint>().Deserialize(s => new Person() { Id = UInt32.Parse(s) });
-        });
-      });
-
-      var data = new MockClass() {
-        CollectionTwo = new Person[] {
-          new Person() { Id = 1 },
-          new Person() { Id = 3 }
-        }
-      };
-
-      var result = serializer.Serialize(data);
-
-      Assert.IsTrue(result["CollectionTwo"] == "1,3");
     }
 
     [Test]
