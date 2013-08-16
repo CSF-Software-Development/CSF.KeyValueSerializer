@@ -7,6 +7,8 @@ using CSF.KeyValueSerializer;
 using CSF.KeyValueSerializer.MappingModel;
 using System.Linq;
 using CSF.Reflection;
+using System.Collections.Specialized;
+using CSF.Collections;
 
 
 namespace Test.CSF.KeyValueSerializer
@@ -646,6 +648,125 @@ namespace Test.CSF.KeyValueSerializer
       var result = serializer.Serialize(data);
 
       Assert.IsTrue(result["TestValueCollection"] == "2010-6-10,2012-11-6");
+    }
+
+    #endregion
+
+    #region more specific tests
+
+    [Test]
+    [Description("This test tries to replicate a possible bug?")]
+    public void TestDeserializeSpecificCase()
+    {
+      var serializer = new ClassKeyValueSerializer<TestEntity>();
+
+      serializer.Map(root => {
+        root.Simple(x => x.Id);
+
+        root.Simple(x => x.Name);
+
+        root.Collection(coll => coll.Inners, collMap => {
+          collMap.UsingFactory(() => new InnerEntity());
+
+          collMap.Simple(x => x.Id);
+
+          collMap.Simple(x => x.Name);
+        });
+      });
+
+      var data = new NameValueCollection { { "Id", "5" },
+                                           { "Name", "Foo" },
+                                           { "Inners[0].Id", "1" },
+                                           { "Inners[0].Name", "Foo" },
+                                           { "Inners[1].Name", "Baz" },
+                                           { "Inners[2].Id", "3" } };
+
+      TestEntity result = serializer.Deserialize(data.ToDictionary());
+
+      Assert.IsNotNull(result, "Result nullability");
+      Assert.AreEqual(5, result.Id, "Result ID");
+      Assert.AreEqual("Foo", result.Name, "Result name");
+
+      if(result.Inners.Count != 3)
+      {
+        Console.Error.WriteLine("Wrong count of inner elements found - ones that are found listed:");
+        foreach(var inner in result.Inners)
+        {
+          Console.Error.WriteLine ("Inner found: ID = {0}, Name = {1}", inner.Id, inner.Name);
+        }
+      }
+
+      Assert.AreEqual(3, result.Inners.Count, "Inner item count");
+      Assert.IsTrue(result.Inners.Any(x => x.Id == 1 && x.Name == "Foo"), "First inner match");
+      Assert.IsTrue(result.Inners.Any(x => x.Name == "Baz"), "Second inner match");
+      Assert.IsTrue(result.Inners.Any(x => x.Id == 3), "Third inner match");
+    }
+
+    [Test]
+    [Description("This test makes uses of the extension methods for canned deserialization.")]
+    public void TestDeserializeUsingExtensionMethods()
+    {
+      var serializer = new ClassKeyValueSerializer<TestEntity>();
+
+      serializer.Map(root => {
+        root.Simple(x => x.Name).DeserializeAsString();
+
+        root.Simple(x => x.InnerIdentity).DeserializeAsIdentity();
+      });
+
+      var data = new NameValueCollection { { "Name", "Foo" },
+                                           { "InnerIdentity", "3" } };
+
+      TestEntity result = serializer.Deserialize(data.ToDictionary());
+
+      Assert.AreEqual("Foo", result.Name, "Correct name");
+      Assert.AreEqual(3, result.InnerIdentity.Value, "Correct identity");
+    }
+
+    #endregion
+
+    #region contained types
+
+    public class TestEntity : Entity<TestEntity,ulong>, ITestEntity
+    {
+      public virtual string Name
+      {
+        get;
+        set;
+      }
+
+      public virtual ICollection<IInnerEntity> Inners
+      {
+        get;
+        set;
+      }
+
+      public virtual IIdentity<InnerEntity> InnerIdentity
+      {
+        get;
+        set;
+      }
+    }
+
+    public class InnerEntity : Entity<InnerEntity,ulong>, IInnerEntity
+    {
+      public virtual string Name
+      {
+        get;
+        set;
+      }
+    }
+
+    public interface ITestEntity : IEntity<TestEntity,ulong>
+    {
+      string Name { get; set; }
+
+      ICollection<IInnerEntity> Inners { get; set; }
+    }
+
+    public interface IInnerEntity : IEntity<InnerEntity,ulong>
+    {
+      string Name { get; set; }
     }
 
     #endregion

@@ -50,7 +50,6 @@
     <Compile Include="StubCollectionContainer.cs" />
     <Compile Include="StubTypes.cs" />
     <Compile Include="TestClassKeyValueSerializer.cs" />
-    <Compile Include="TestEntityDeserialization.cs" />
     <Compile Include="TestValueTypeCollectionKeyValueSerializer.cs" />
     <Compile Include="MappingHelpers\TestClassMappingHelper.cs" />
     <Compile Include="MappingHelpers\TestCompositeMappingHelper.cs" />

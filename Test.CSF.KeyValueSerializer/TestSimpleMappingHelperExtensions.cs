@@ -4,6 +4,7 @@ using Moq;
 using CSF.KeyValueSerializer;
 using CSF.KeyValueSerializer.MappingHelpers;
 using CSF.KeyValueSerializer.MappingModel;
+using CSF.Entities;
 
 namespace Test.CSF.KeyValueSerializer
 {
@@ -42,6 +43,23 @@ namespace Test.CSF.KeyValueSerializer
       Assert.IsInstanceOfType(typeof(Func<string,SampleEnum>), mapping.Object.DeserializationFunction, "Mapping function is correct type.");
 
       Assert.AreEqual(SampleEnum.Two, mapping.Object.DeserializationFunction("Two"), "Mapping function returns correct value.");
+    }
+
+    [Test]
+    public void TestDeserializeAsIdentity()
+    {
+      var mapping = new Mock<ISimpleMapping<IIdentity<EntityType>>>();
+      mapping.SetupProperty(x => x.DeserializationFunction);
+
+      SimpleMappingHelper<Foo,IIdentity<EntityType>> helper = new SimpleMappingHelper<Foo,IIdentity<EntityType>>(mapping.Object);
+
+      var simple = helper.DeserializeAsIdentity();
+
+      Assert.IsNotNull(simple, "Simple mapping helper is not null");
+      Assert.IsNotNull(mapping.Object.DeserializationFunction, "Mapping function is not null.");
+      Assert.IsInstanceOfType(typeof(Func<string,IIdentity<EntityType>>), mapping.Object.DeserializationFunction, "Mapping function is correct type.");
+
+      Assert.AreEqual(new Identity<EntityType,int>(5), mapping.Object.DeserializationFunction("5"), "Mapping function returns correct value.");
     }
   }
 }

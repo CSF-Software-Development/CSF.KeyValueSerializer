@@ -1,5 +1,6 @@
 using System;
 using CSF.KeyValueSerializer.MappingHelpers;
+using CSF.Entities;
 
 namespace CSF.KeyValueSerializer
 {
@@ -156,6 +157,28 @@ namespace CSF.KeyValueSerializer
       where TValue : struct
     {
       return helper.Deserialize(val => val.ParseAs<TValue>());
+    }
+
+    /// <summary>
+    /// Deserializes the value as an entity identity.
+    /// </summary>
+    /// <returns>
+    /// The mapping helper.
+    /// </returns>
+    /// <param name='helper'>
+    /// A suitable mapping helper instance.
+    /// </param>
+    /// <typeparam name='TObject'>
+    /// The type of the reference type object being deserialized.
+    /// </typeparam>
+    /// <typeparam name='TEntity'>
+    /// The type of entity for which an identity is desired.
+    /// </typeparam>
+    public static ISimpleMappingHelper<TObject,IIdentity<TEntity>> DeserializeAsIdentity<TObject,TEntity>(this ISimpleMappingHelper<TObject,IIdentity<TEntity>> helper)
+      where TObject : class
+      where TEntity : IEntity
+    {
+      return helper.Deserialize(val => IdentityParser.Parse<TEntity>(val));
     }
 
     #endregion
