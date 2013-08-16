@@ -7,7 +7,6 @@ using CSF.KeyValueSerializer;
 using CSF.KeyValueSerializer.MappingModel;
 using System.Linq;
 using CSF.Reflection;
-using CSF.Patterns.IoC;
 
 
 namespace Test.CSF.KeyValueSerializer
