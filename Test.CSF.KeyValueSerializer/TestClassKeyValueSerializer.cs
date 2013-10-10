@@ -302,6 +302,58 @@ namespace Test.CSF.KeyValueSerializer
     }
 
     [Test]
+    public void TestDeserializeNestedCommaSeparatedCollection()
+    {
+      var serializer = new ClassKeyValueSerializer<Baz>();
+
+      serializer.Map(root => {
+        root.Simple(x => x.BazProperty).Deserialize(val => new DateTime(2010, Int32.Parse(val), 1));
+
+        root.Collection(rootProp => rootProp.TestCollection, rootMap => {
+          rootMap.UsingFactory(() => new Bar("Test value"));
+
+          rootMap.ValueCollection(firstProp => firstProp.ValueCollection, firstMap => {
+            firstMap.CommaSeparatedList();
+
+            firstMap.Simple()
+              .Deserialize(val => new DateTime(Int32.Parse(val), 1, 1));
+          });
+        });
+      });
+
+      var collection = new Dictionary<string,string>();
+
+      collection.Add("BazProperty", "2");
+      collection.Add("TestCollection[0].ValueCollection", "2010,2012");
+      collection.Add("TestCollection[1].ValueCollection", "2011,2013");
+
+      Baz result = serializer.Deserialize(collection);
+
+      Assert.IsNotNull(result, "Result is not null");
+      Assert.AreEqual(new DateTime(2010, 2, 1), result.BazProperty, "Correct 'BazProperty'.");
+      Assert.IsNotNull(result.TestCollection, "Test collection is not null");
+      Assert.AreEqual(2, result.TestCollection.Count, "Test collection correct length");
+      Assert.IsNotNull(result.TestCollection.Skip(0).Take(1).First().BazCollection,
+                       "1st Inner collection not null");
+      Assert.IsNotNull(result.TestCollection.Skip(1).Take(1).First().BazCollection,
+                       "2nd inner collection not null");
+      Assert.AreEqual(2,
+                      result.TestCollection.Skip(0).Take(1).First().BazCollection.Count,
+                      "1st Inner collection correct length");
+      Assert.AreEqual(2,
+                      result.TestCollection.Skip(1).Take(1).First().BazCollection.Count,
+                      "2nd inner collection correct length");
+      Assert.IsTrue(result.TestCollection.Skip(0).Take(1).First().BazCollection.Any(x => x.BazProperty.Year == 2010),
+                    "1st Inner collection contains 2010");
+      Assert.IsTrue(result.TestCollection.Skip(0).Take(1).First().BazCollection.Any(x => x.BazProperty.Year == 2012),
+                    "1st Inner collection contains 2012");
+      Assert.IsTrue(result.TestCollection.Skip(1).Take(1).First().BazCollection.Any(x => x.BazProperty.Year == 2011),
+                    "2nd Inner collection contains 2011");
+      Assert.IsTrue(result.TestCollection.Skip(1).Take(1).First().BazCollection.Any(x => x.BazProperty.Year == 2013),
+                    "2nd Inner collection contains 2013");
+    }
+
+    [Test]
     [ExpectedException]
     public void TestDeserializeCommaSeparatedCompositeNotPermitted()
     {
