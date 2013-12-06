@@ -63,6 +63,7 @@
     <Compile Include="MappingModel\TestCompositeMapping.cs" />
     <Compile Include="MappingModel\TestSimpleMapping.cs" />
     <Compile Include="TestSimpleMappingHelperExtensions.cs" />
+    <Compile Include="TestSerializerFactory.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
