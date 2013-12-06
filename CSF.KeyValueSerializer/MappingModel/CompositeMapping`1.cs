@@ -39,6 +39,8 @@ namespace CSF.KeyValueSerializer.MappingModel
     #region fields
 
     private IDictionary<object, ICompositeComponentMapping<TValue>> _components;
+    private Func<IDictionary<object, string>, TValue> _deserializationFunction;
+    private CompositeParser<TValue> _parser;
 
     #endregion
 
@@ -53,8 +55,36 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </value>
     public Func<IDictionary<object, string>, TValue> DeserializationFunction
     {
-      get;
-      set;
+      get {
+        return _deserializationFunction;
+      }
+      set {
+        _deserializationFunction = value;
+        if(value != null)
+        {
+          _parser = this.CreateDefaultParser(value);
+        }
+        else
+        {
+          _parser = null;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the parser method body.
+    /// </summary>
+    /// <value>
+    /// The parser.
+    /// </value>
+    public CompositeParser<TValue> Parser
+    {
+      get {
+        return _parser;
+      }
+      set {
+        _parser = value;
+      }
     }
 
     /// <summary>
@@ -123,12 +153,7 @@ namespace CSF.KeyValueSerializer.MappingModel
 
         if(values.Count > 0)
         {
-          try
-          {
-            result = this.DeserializationFunction(values);
-            output = true;
-          }
-          catch(Exception) {}
+          output = _parser(values, out result);
         }
       }
 
@@ -169,15 +194,11 @@ namespace CSF.KeyValueSerializer.MappingModel
       {
         string serialized = null;
 
-        try
+        output = component.Renderer(data, out serialized);
+        if(serialized == null)
         {
-          serialized = component.SerializationFunction(data);
-          if(serialized == null)
-          {
-            output = false;
-          }
+          output = false;
         }
-        catch(Exception) { output = false; }
 
         if(output)
         {
@@ -231,19 +252,56 @@ namespace CSF.KeyValueSerializer.MappingModel
     {
       base.Validate ();
 
-      if(this.Components.Count == 0)
+      if(_components.Count == 0)
       {
         throw new InvalidMappingException("A composite mapping must contain at least one component to be valid.");
       }
-      else if(this.DeserializationFunction == null
-              && this.Components.Values.Any(x => x.SerializationFunction == null))
+      else if(_parser == null
+              && _components.Values.Any(x => x.Renderer == null))
       {
         throw new InvalidMappingException("This composite mapping is 'useless'.  It must either expose a " +
                                           "deserialization function or all of its components must expose " +
                                           "serialization functions.");
       }
+    }
 
-      // There is more to do here!
+    /// <summary>
+    /// Creates a new parser function from an old-style deserialization function.
+    /// </summary>
+    /// <returns>
+    /// The parser.
+    /// </returns>
+    /// <param name='deserializer'>
+    /// The old-style deserializer.
+    /// </param>
+    private CompositeParser<TValue> CreateDefaultParser(Func<IDictionary<object, string>, TValue> deserializer)
+    {
+      if(deserializer == null)
+      {
+        throw new ArgumentNullException("deserializer");
+      }
+
+      return (IDictionary<object, string> components, out TValue result) => {
+        bool success = false;
+        result = default(TValue);
+
+        try
+        {
+          result = deserializer(components);
+          success = true;
+        }
+        catch(Exception)
+        {
+          success = false;
+        }
+
+        if(!success)
+        {
+          result = default(TValue);
+        }
+
+        return success;
+      };
     }
 
     #endregion
@@ -261,8 +319,9 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </param>
     public CompositeMapping(IMapping parentMapping, PropertyInfo property) : base(parentMapping, property, false)
     {
-      this.DeserializationFunction = null;
-      this.Components = new Dictionary<object, ICompositeComponentMapping<TValue>>();
+      _deserializationFunction = null;
+      _parser = null;
+      _components = new Dictionary<object, ICompositeComponentMapping<TValue>>();
     }
 
     #endregion

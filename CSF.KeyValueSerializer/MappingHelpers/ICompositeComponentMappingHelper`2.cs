@@ -36,6 +36,14 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// A method body containing the serialization function.
     /// </param>
     void Serialize(Func<TValue,string> serializationFunction);
+
+    /// <summary>
+    /// Facilitates the provision of a serialization function.
+    /// </summary>
+    /// <param name='renderer'>
+    /// A method body containing the serialization function.
+    /// </param>
+    void Render(SimpleRenderer<TValue> renderer);
   }
 }
 

@@ -103,6 +103,9 @@
     <Compile Include="IValTypeSerializer.cs" />
     <Compile Include="ISerializerFactory.cs" />
     <Compile Include="SerializerOptions.SerializerOptionsBuilder.cs" />
+    <Compile Include="SimpleParser.cs" />
+    <Compile Include="SimpleRenderer.cs" />
+    <Compile Include="CompositeParser.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSF\CSF\CSF.csproj">

@@ -187,6 +187,71 @@ namespace Test.CSF.KeyValueSerializer
     }
 
     [Test]
+    public void TestDeserializeWithNewAPI()
+    {
+      var serializer = new ClassKeyValueSerializer<MockClass>();
+
+      serializer.Map(root => {
+        root.Composite(x => x.PropertyThree)
+          .Component("Year", m => m.Render((DateTime d, out string res) => { res = d.Year.ToString(); return true; }))
+          .Component("Month", m => m.Render((DateTime d, out string res) => { res = d.Month.ToString(); return true; }))
+          .Component("Day", m => m.Render((DateTime d, out string res) => { res = d.Day.ToString(); return true; }))
+          .Parse((IDictionary<object,string> data, out DateTime result) => {
+              int year, month, day;
+              bool output;
+
+              if(Int32.TryParse(data["Year"], out year)
+                 && Int32.TryParse(data["Month"], out month)
+                 && Int32.TryParse(data["Day"], out day))
+              {
+                try
+                {
+                  result = new DateTime(year, month, day);
+                  output = true;
+                }
+                catch(ArgumentException)
+                {
+                  result = default(DateTime);
+                  output = false;
+                }
+              }
+              else
+              {
+                result = default(DateTime);
+                output = false;
+              }
+
+              return output;
+            });
+      });
+
+      var collection = new Dictionary<string,string>();
+
+      collection.Add("PropertyOne", "Test value for property one");
+      collection.Add("PropertyThreeYear", "2012");
+      collection.Add("PropertyThreeMonth", "11");
+      collection.Add("PropertyThreeDay", "2");
+      collection.Add("CollectionOne[0]", "Sample value 1");
+      collection.Add("CollectionOne[1]", "Sample value 2");
+      collection.Add("CollectionOne[2]", "Sample value 3");
+      collection.Add("CollectionThree[0]Year", "2010");
+      collection.Add("CollectionThree[0]Month", "2");
+      collection.Add("CollectionThree[0]Day", "2");
+      collection.Add("CollectionThree[1]Year", "2000");
+      collection.Add("CollectionThree[1]Month", "1");
+      collection.Add("CollectionThree[1]Day", "1");
+      collection.Add("PropertyFour.Name", "Craig Fowler");
+      collection.Add("PropertyFour.Friends", "20");
+      collection.Add("PropertyFour.BirthdayYear", "1982");
+      collection.Add("PropertyFour.BirthdayMonth", "4");
+      collection.Add("PropertyFour.BirthdayDay", "6");
+
+      MockClass parsed = serializer.Deserialize(collection);
+
+      Assert.AreEqual(new DateTime(2012,11,2), parsed.PropertyThree);
+    }
+
+    [Test]
     public void TestDeserializeNestedCollectionClass()
     {
       var serializer = new ClassKeyValueSerializer<Baz>();

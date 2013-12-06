@@ -31,6 +31,8 @@ namespace CSF.KeyValueSerializer.MappingModel
 
     private ICompositeMapping<TValue> _parentMapping;
     private object _componentIdentifier;
+    private Func<TValue, string> _serializationFunction;
+    private SimpleRenderer<TValue> _renderer;
 
     #endregion
 
@@ -87,8 +89,36 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </value>
     public Func<TValue, string> SerializationFunction
     {
-      get;
-      set;
+      get {
+        return _serializationFunction;
+      }
+      set {
+        _serializationFunction = value;
+        if(value != null)
+        {
+          _renderer = this.CreateDefaultRenderer(value);
+        }
+        else
+        {
+          _renderer = null;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the renderer method body.
+    /// </summary>
+    /// <value>
+    /// The renderer.
+    /// </value>
+    public SimpleRenderer<TValue> Renderer
+    {
+      get {
+        return _renderer;
+      }
+      set {
+        _renderer = value;
+      }
     }
 
     #endregion
@@ -111,6 +141,45 @@ namespace CSF.KeyValueSerializer.MappingModel
                            this.ComponentIdentifier.ToString());
     }
 
+    /// <summary>
+    /// Creates a default renderer from and old-style serialization function.
+    /// </summary>
+    /// <returns>
+    /// The default renderer.
+    /// </returns>
+    /// <param name='serializer'>
+    /// Serializer.
+    /// </param>
+    private SimpleRenderer<TValue> CreateDefaultRenderer(Func<TValue, string> serializer)
+    {
+      if(serializer == null)
+      {
+        throw new ArgumentNullException("serializer");
+      }
+
+      return (TValue input, out string result) => {
+        bool success = false;
+        result = null;
+
+        try
+        {
+          result = serializer(input);
+          success = true;
+        }
+        catch(Exception)
+        {
+          success = false;
+        }
+
+        if(!success)
+        {
+          result = null;
+        }
+
+        return success;
+      };
+    }
+
     #endregion
 
     #region constructor
@@ -126,8 +195,10 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </param>
     public CompositeComponentMapping(ICompositeMapping<TValue> parentMapping, object componentIdentifier)
     {
-      this.ParentMapping = parentMapping;
-      this.ComponentIdentifier = componentIdentifier;
+      _serializationFunction = null;
+      _renderer = null;
+      _parentMapping = parentMapping;
+      _componentIdentifier = componentIdentifier;
     }
 
     #endregion

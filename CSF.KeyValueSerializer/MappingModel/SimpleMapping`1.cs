@@ -29,6 +29,15 @@ namespace CSF.KeyValueSerializer.MappingModel
   /// </summary>
   public class SimpleMapping<TValue> : MappingBase<TValue>, ISimpleMapping<TValue>
   {
+    #region fields
+
+    private Func<string, TValue> _deserializationFunction;
+    private Func<TValue, string> _serializationFunction;
+    private SimpleParser<TValue> _parser;
+    private SimpleRenderer<TValue> _renderer;
+
+    #endregion
+
     #region ISimpleMapping implementation
 
     /// <summary>
@@ -39,8 +48,13 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </value>
     public virtual Func<string, TValue> DeserializationFunction
     {
-      get;
-      set;
+      get {
+        return _deserializationFunction;
+      }
+      set {
+        _deserializationFunction = value;
+        _parser = (value != null)? this.CreateDefaultParser(value) : null;
+      }
     }
 
     /// <summary>
@@ -51,8 +65,45 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </value>
     public virtual Func<TValue, string> SerializationFunction
     {
-      get;
-      set;
+      get {
+        return _serializationFunction;
+      }
+      set {
+        _serializationFunction = value;
+        _renderer = (value != null)? this.CreateDefaultRenderer(value) : null;
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the parser method body.
+    /// </summary>
+    /// <value>
+    /// The parser.
+    /// </value>
+    public virtual SimpleParser<TValue> Parser
+    {
+      get {
+        return _parser;
+      }
+      set {
+        _parser = value;
+      }
+    }
+
+    /// <summary>
+    /// Gets or sets the renderer method body.
+    /// </summary>
+    /// <value>
+    /// The renderer.
+    /// </value>
+    public virtual SimpleRenderer<TValue> Renderer
+    {
+      get {
+        return _renderer;
+      }
+      set {
+        _renderer = value;
+      }
     }
 
     /// <summary>
@@ -62,7 +113,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     {
       base.Validate();
 
-      if(this.DeserializationFunction == null && this.SerializationFunction == null)
+      if(_parser == null && _renderer == null)
       {
         throw new InvalidMappingException("Property mapping does not have either a serialization or " +
                                           "deserialization function - this is invalid (a useless mapping).");
@@ -115,12 +166,7 @@ namespace CSF.KeyValueSerializer.MappingModel
         string keyName = this.GetKeyName(collectionIndices);
         if(data.ContainsKey(keyName))
         {
-          try
-          {
-            result = this.DeserializationFunction(data[keyName]);
-            output = true;
-          }
-          catch(Exception) {}
+          output = _parser(data[keyName], out result);
         }
       }
 
@@ -156,20 +202,12 @@ namespace CSF.KeyValueSerializer.MappingModel
       result = null;
       string serialized = null;
 
-      if(this.SerializationFunction == null)
+      if(_renderer == null)
       {
         throw new InvalidOperationException("Cannot deserialize - this simple mapping does not provide a serialization function.");
       }
 
-      try
-      {
-        serialized = this.SerializationFunction(data);
-        if(serialized != null)
-        {
-          output = true;
-        }
-      }
-      catch(Exception) {}
+      output = _renderer(data, out serialized);
 
       if(output)
       {
@@ -187,6 +225,88 @@ namespace CSF.KeyValueSerializer.MappingModel
 
     #endregion
 
+    #region methods
+
+    /// <summary>
+    /// Creates a default renderer from and old-style serialization function.
+    /// </summary>
+    /// <returns>
+    /// The default renderer.
+    /// </returns>
+    /// <param name='serializer'>
+    /// Serializer.
+    /// </param>
+    private SimpleRenderer<TValue> CreateDefaultRenderer(Func<TValue, string> serializer)
+    {
+      if(serializer == null)
+      {
+        throw new ArgumentNullException("serializer");
+      }
+
+      return (TValue input, out string result) => {
+        bool success = false;
+        result = null;
+
+        try
+        {
+          result = serializer(input);
+          success = (result != null);
+        }
+        catch(Exception)
+        {
+          success = false;
+        }
+
+        if(!success)
+        {
+          result = null;
+        }
+
+        return success;
+      };
+    }
+
+    /// <summary>
+    /// Creates a new parser function from an old-style deserialization function.
+    /// </summary>
+    /// <returns>
+    /// The parser.
+    /// </returns>
+    /// <param name='deserializer'>
+    /// The old-style deserializer.
+    /// </param>
+    private SimpleParser<TValue> CreateDefaultParser(Func<string, TValue> deserializer)
+    {
+      if(deserializer == null)
+      {
+        throw new ArgumentNullException("deserializer");
+      }
+
+      return (string input, out TValue result) => {
+        bool success = false;
+        result = default(TValue);
+
+        try
+        {
+          result = deserializer(input);
+          success = true;
+        }
+        catch(Exception)
+        {
+          success = false;
+        }
+
+        if(!success)
+        {
+          result = default(TValue);
+        }
+
+        return success;
+      };
+    }
+
+    #endregion
+
     #region constructor
 
     /// <summary>
@@ -200,8 +320,11 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </param>
     public SimpleMapping(IMapping parentMapping, PropertyInfo property) : base(parentMapping, property, false)
     {
-      this.DeserializationFunction = (strVal => (TValue) Convert.ChangeType(strVal, typeof(TValue)));
-      this.SerializationFunction = (val => (val != null)? val.ToString() : null);
+      _deserializationFunction = (strVal => (TValue) Convert.ChangeType(strVal, typeof(TValue)));
+      _serializationFunction = (val => (val != null)? val.ToString() : null);
+
+      _parser = this.CreateDefaultParser(_deserializationFunction);
+      _renderer = this.CreateDefaultRenderer(_serializationFunction);
     }
 
     #endregion

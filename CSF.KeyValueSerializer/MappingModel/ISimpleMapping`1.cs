@@ -46,6 +46,22 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// </value>
     Func<TValue,string> SerializationFunction { get; set; }
 
+    /// <summary>
+    /// Gets or sets the parser method body.
+    /// </summary>
+    /// <value>
+    /// The parser.
+    /// </value>
+    SimpleParser<TValue> Parser { get; set; }
+
+    /// <summary>
+    /// Gets or sets the renderer method body.
+    /// </summary>
+    /// <value>
+    /// The renderer.
+    /// </value>
+    SimpleRenderer<TValue> Renderer { get; set; }
+
     #endregion
   }
 }

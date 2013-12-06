@@ -41,6 +41,14 @@ namespace CSF.KeyValueSerializer.MappingModel
     Func<IDictionary<object,string>,TValue> DeserializationFunction { get; set; }
 
     /// <summary>
+    /// Gets or sets the parser method body.
+    /// </summary>
+    /// <value>
+    /// The parser.
+    /// </value>
+    CompositeParser<TValue> Parser { get; set; }
+
+    /// <summary>
     /// Gets a collection of the components that make up this mapping and their respective mappings.
     /// </summary>
     /// <value>

@@ -51,6 +51,14 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// A method body containing the serialization function.
     /// </value>
     Func<TValue,string> SerializationFunction { get; set; }
+
+    /// <summary>
+    /// Gets or sets the renderer method body.
+    /// </summary>
+    /// <value>
+    /// The renderer.
+    /// </value>
+    SimpleRenderer<TValue> Renderer { get; set; }
   }
 }
 

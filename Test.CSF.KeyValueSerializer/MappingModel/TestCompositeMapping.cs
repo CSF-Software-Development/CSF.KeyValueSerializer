@@ -77,10 +77,16 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
       DateTime date = DateTime.Today;
 
       yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.SerializationFunction).Returns(d => d.Year.ToString());
+      yearComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
+        rendered = DateTime.Today.Year.ToString();
+        return true;
+      });
       yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
       monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.SerializationFunction).Returns(d => d.Month.ToString());
+      monthComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
+        rendered = DateTime.Today.Month.ToString();
+        return true;
+      });
       monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
@@ -107,10 +113,16 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
       DateTime date = DateTime.Today;
 
       yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.SerializationFunction).Returns(d => d.Year.ToString());
+      yearComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
+        rendered = DateTime.Today.Year.ToString();
+        return true;
+      });
       yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
       monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.SerializationFunction).Returns(d => d.Month.ToString());
+      monthComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
+        rendered = DateTime.Today.Month.ToString();
+        return true;
+      });
       monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
@@ -139,38 +151,15 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
       DateTime date = DateTime.Today;
 
       yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.SerializationFunction).Returns(d => d.Year.ToString());
+      yearComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
+        rendered = DateTime.Today.Year.ToString();
+        return true;
+      });
       yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
       monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.SerializationFunction).Returns(d => null);
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
-
-      CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
-                                                                          Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
-
-      IDictionary<string,string> result;
-      bool success = mapping.Serialize(date, out result, new int[0]);
-
-      Assert.IsFalse(success, "Success");
-      Assert.IsNull(result, "Result nullability");
-    }
-
-    [Test]
-    public void TestSerializeComponentException()
-    {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var parent = new Mock<IMapping>();
-      DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.SerializationFunction).Returns(d => d.Year.ToString());
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.SerializationFunction).Returns(d => {
-        throw new Exception("Test exception");
+      monthComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
+        rendered = null;
+        return false;
       });
       monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
 

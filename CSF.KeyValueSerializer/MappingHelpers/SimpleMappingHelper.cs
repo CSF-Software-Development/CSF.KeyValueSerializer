@@ -58,6 +58,30 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     }
 
     /// <summary>
+    ///  Facilitates the provision of a custom function for serializing object values to a string. 
+    /// </summary>
+    /// <param name='renderer'>
+    ///  A method body for serializing values. 
+    /// </param>
+    public virtual ISimpleMappingHelper<TObject, TValue> Render(SimpleRenderer<TValue> renderer)
+    {
+      this.Mapping.Renderer = renderer;
+      return this;
+    }
+
+    /// <summary>
+    ///  Facilitates the provision of a custom function for deserializing strings to an object value. 
+    /// </summary>
+    /// <param name='parser'>
+    ///  A method body for deserializing values. 
+    /// </param>
+    public virtual ISimpleMappingHelper<TObject, TValue> Parse(SimpleParser<TValue> parser)
+    {
+      this.Mapping.Parser = parser;
+      return this;
+    }
+
+    /// <summary>
     ///  Facilitates the setting of a key-naming-policy into the associated mapping. 
     /// </summary>
     /// <returns>

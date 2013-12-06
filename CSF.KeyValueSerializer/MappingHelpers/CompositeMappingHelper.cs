@@ -105,6 +105,18 @@ namespace CSF.KeyValueSerializer.MappingHelpers
       return this;
     }
 
+    /// <summary>
+    ///  A method body that indicates how instances of the mapped type should be deserialized from the component values. 
+    /// </summary>
+    /// <param name='parser'>
+    ///  A method body containing the deserialization function. 
+    /// </param>
+    public ICompositeMappingHelper<TObject, TValue> Parse (CompositeParser<TValue> parser)
+    {
+      this.Mapping.Parser = parser;
+      return this;
+    }
+
     #endregion
 
     #region constructor
