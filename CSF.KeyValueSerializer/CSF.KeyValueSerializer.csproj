@@ -94,6 +94,15 @@
     <Compile Include="IKeyValueSerializer`1.cs" />
     <Compile Include="IKeyValueSerializer.cs" />
     <Compile Include="SimpleMappingHelperExtensions.cs" />
+    <Compile Include="SerializerOptions.cs" />
+    <Compile Include="SerializerFactory.cs" />
+    <Compile Include="ISerializer.cs" />
+    <Compile Include="IRefTypeCollSerializer.cs" />
+    <Compile Include="IRefTypeSerializer.cs" />
+    <Compile Include="IValTypeCollSerializer.cs" />
+    <Compile Include="IValTypeSerializer.cs" />
+    <Compile Include="ISerializerFactory.cs" />
+    <Compile Include="SerializerOptions.SerializerOptionsBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSF\CSF\CSF.csproj">

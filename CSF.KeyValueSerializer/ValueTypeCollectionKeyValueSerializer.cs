@@ -33,7 +33,7 @@ namespace CSF.KeyValueSerializer
   /// The type of the 'root' object that this serializer instance will work with.
   /// </typeparam>
   public class ValueTypeCollectionKeyValueSerializer<TOutput>
-    : KeyValueSerializerBase<ICollection<TOutput>>, IValueTypeCollectionKeyValueSerializer<TOutput>
+    : KeyValueSerializerBase<ICollection<TOutput>>, IValueTypeCollectionKeyValueSerializer<TOutput>, IValTypeCollSerializer<TOutput>
     where TOutput : struct
   {
     /// <summary>

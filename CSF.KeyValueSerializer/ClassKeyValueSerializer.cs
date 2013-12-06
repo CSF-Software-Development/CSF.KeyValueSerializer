@@ -31,7 +31,7 @@ namespace CSF.KeyValueSerializer
   /// The type of the 'root' object that this serializer instance will work with.
   /// </typeparam>
   public class ClassKeyValueSerializer<TOutput>
-    : KeyValueSerializerBase<TOutput>, IClassKeyValueSerializer<TOutput>
+    : KeyValueSerializerBase<TOutput>, IClassKeyValueSerializer<TOutput>, IRefTypeSerializer<TOutput>
     where TOutput : class
   {
 
