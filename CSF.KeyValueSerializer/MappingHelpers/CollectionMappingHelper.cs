@@ -26,7 +26,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
   /// <summary>
   /// Base class for mapping helpers that map collection-type mappings.
   /// </summary>
-  public abstract class CollectionMappingHelper<TMapping> : MappingHelper<TMapping>, ICollectionMappingHelper
+  public abstract class CollectionMappingHelper<TMapping> : MappingHelper<TMapping>
     where TMapping : ICollectionMapping
   {
     #region ICollectionMappingHelper implementation

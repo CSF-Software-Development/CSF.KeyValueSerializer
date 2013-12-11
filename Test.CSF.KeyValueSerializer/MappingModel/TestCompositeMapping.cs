@@ -15,14 +15,15 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestGetKeyName()
     {
-      var componentMap = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
-
-      componentMap.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", componentMap.Object);
+      var componentMap = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapping.Components.Add("Year", componentMap);
 
       Assert.AreEqual("FooYear", mapping.GetKeyName("Year", new int[0]));
     }
@@ -53,14 +54,12 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
                        ExpectedMessage = "This composite mapping is 'useless'.  It must either expose a deserialization function or all of its components must expose serialization functions.")]
     public void TestValidateUseless()
     {
-      var componentMap = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
-
-      componentMap.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", componentMap.Object);
+      var componentMap = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      mapping.Components.Add("Year", componentMap);
       mapping.Validate();
     }
 
@@ -71,28 +70,27 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestSerializeSuccess()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
-      DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
-        rendered = DateTime.Today.Year.ToString();
-        return true;
-      });
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
-        rendered = DateTime.Today.Month.ToString();
-        return true;
-      });
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      DateTime date = DateTime.Today;
+
+      yearComponent.Renderer = (DateTime data, out string rendered) => {
+        rendered = data.Year.ToString();
+        return true;
+      };
+      monthComponent.Renderer = (DateTime data, out string rendered) => {
+        rendered = data.Month.ToString();
+        return true;
+      };
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
 
       IDictionary<string,string> result;
       bool success = mapping.Serialize(date, out result, new int[0]);
@@ -100,35 +98,34 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
       Assert.IsTrue(success, "Success");
       Assert.IsNotNull(result, "Result nullability");
       Assert.AreEqual(2, result.Count, "Result count");
-      Assert.IsTrue(result["FooYear"] == date.Year.ToString(), "First component");
-      Assert.IsTrue(result["FooMonth"] == date.Month.ToString(), "Second component");
+      Assert.IsTrue(result["TestDateTimeYear"] == date.Year.ToString(), "First component");
+      Assert.IsTrue(result["TestDateTimeMonth"] == date.Month.ToString(), "Second component");
     }
 
     [Test]
     public void TestSerializeAndWriteFlag()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
-      DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
-        rendered = DateTime.Today.Year.ToString();
-        return true;
-      });
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
-        rendered = DateTime.Today.Month.ToString();
-        return true;
-      });
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      DateTime date = DateTime.Today;
+
+      yearComponent.Renderer = (DateTime data, out string rendered) => {
+        rendered = data.Year.ToString();
+        return true;
+      };
+      monthComponent.Renderer = (DateTime data, out string rendered) => {
+        rendered = data.Month.ToString();
+        return true;
+      };
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
       mapping.FlagKey = "date";
 
       IDictionary<string,string> result;
@@ -137,36 +134,35 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
       Assert.IsTrue(success, "Success");
       Assert.IsNotNull(result, "Result nullability");
       Assert.AreEqual(3, result.Count, "Result count");
-      Assert.IsTrue(result["FooYear"] == date.Year.ToString(), "First component");
-      Assert.IsTrue(result["FooMonth"] == date.Month.ToString(), "Second component");
+      Assert.IsTrue(result["TestDateTimeYear"] == date.Year.ToString(), "First component");
+      Assert.IsTrue(result["TestDateTimeMonth"] == date.Month.ToString(), "Second component");
       Assert.IsTrue(result["date"] == Boolean.TrueString, "Flag");
     }
 
     [Test]
     public void TestSerializeComponentFailure()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
-      DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
-        rendered = DateTime.Today.Year.ToString();
-        return true;
-      });
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.Renderer).Returns((DateTime data, out string rendered) => {
-        rendered = null;
-        return false;
-      });
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      DateTime date = DateTime.Today;
+
+      yearComponent.Renderer = (DateTime data, out string rendered) => {
+        rendered = data.Year.ToString();
+        return true;
+      };
+      monthComponent.Renderer = (DateTime data, out string rendered) => {
+        rendered = null;
+        return false;
+      };
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
 
       IDictionary<string,string> result;
       bool success = mapping.Serialize(date, out result, new int[0]);
@@ -193,8 +189,8 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [ExpectedException(ExceptionType = typeof(InvalidOperationException))]
     public void TestSerializeNoSerializationFunction()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
+      var yearComponent = new Mock<CompositeComponentMapping<DateTime>>();
+      var monthComponent = new Mock<CompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
       DateTime date = DateTime.Today;
 
@@ -221,25 +217,39 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeSuccess()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
       DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
-      mapping.DeserializationFunction = dict => new DateTime(Int32.Parse(dict["Year"]), Int32.Parse(dict["Month"]), 1);
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
+
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
+      mapping.Parser = (IDictionary<object,string> components, out DateTime result) => {
+        bool outcome;
+
+        try
+        {
+          result = new DateTime(Int32.Parse(components["Year"]), Int32.Parse(components["Month"]), 1);
+          outcome = true;
+        }
+        catch(Exception)
+        {
+          outcome = false;
+          result = default(DateTime);
+        }
+
+        return outcome;
+      };
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       IDictionary<string,string> data = new Dictionary<string, string>();
-      data.Add("FooYear", date.Year.ToString());
-      data.Add("FooMonth", date.Month.ToString());
+      data.Add("TestDateTimeYear", date.Year.ToString());
+      data.Add("TestDateTimeMonth", date.Month.ToString());
 
       DateTime output;
       bool success = mapping.Deserialize(data, out output, new int[0]);
@@ -252,26 +262,40 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeFlagFailure()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
       DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
-      mapping.DeserializationFunction = dict => new DateTime(Int32.Parse(dict["Year"]), Int32.Parse(dict["Month"]), 1);
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
+
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
+      mapping.Parser = (IDictionary<object,string> components, out DateTime result) => {
+        bool outcome;
+
+        try
+        {
+          result = new DateTime(Int32.Parse(components["Year"]), Int32.Parse(components["Month"]), 1);
+          outcome = true;
+        }
+        catch(Exception)
+        {
+          outcome = false;
+          result = default(DateTime);
+        }
+
+        return outcome;
+      };
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
       mapping.FlagKey = "flag";
 
       IDictionary<string,string> data = new Dictionary<string, string>();
-      data.Add("FooYear", date.Year.ToString());
-      data.Add("FooMonth", date.Month.ToString());
+      data.Add("TestDateTimeYear", date.Year.ToString());
+      data.Add("TestDateTimeMonth", date.Month.ToString());
 
       DateTime output;
       bool success = mapping.Deserialize(data, out output, new int[0]);
@@ -301,20 +325,34 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAllComponentsMissing()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
-      mapping.DeserializationFunction = dict => new DateTime(Int32.Parse(dict["Year"]), Int32.Parse(dict["Month"]), 1);
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
+
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
+      mapping.Parser = (IDictionary<object,string> components, out DateTime result) => {
+        bool outcome;
+
+        try
+        {
+          result = new DateTime(Int32.Parse(components["Year"]), Int32.Parse(components["Month"]), 1);
+          outcome = true;
+        }
+        catch(Exception)
+        {
+          outcome = false;
+          result = default(DateTime);
+        }
+
+        return outcome;
+      };
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       IDictionary<string,string> data = new Dictionary<string, string>();
 
@@ -327,24 +365,38 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeSomeComponentsMissing()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
       DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
-      mapping.DeserializationFunction = dict => new DateTime(Int32.Parse(dict["Year"]), Int32.Parse(dict["Month"]), 1);
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
+
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
+      mapping.Parser = (IDictionary<object,string> components, out DateTime result) => {
+        bool outcome;
+
+        try
+        {
+          result = new DateTime(Int32.Parse(components["Year"]), Int32.Parse(components["Month"]), 1);
+          outcome = true;
+        }
+        catch(Exception)
+        {
+          outcome = false;
+          result = default(DateTime);
+        }
+
+        return outcome;
+      };
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       IDictionary<string,string> data = new Dictionary<string, string>();
-      data.Add("FooYear", date.Year.ToString());
+      data.Add("TestDateTimeYear", date.Year.ToString());
 
       DateTime output;
       bool success = mapping.Deserialize(data, out output, new int[0]);
@@ -353,29 +405,29 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     }
 
     [Test]
+    [ExpectedException]
     public void TestDeseralizeException()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
+      var namingPolicy = new Mock<IKeyNamingPolicy>();
       DateTime date = DateTime.Today;
-
-      yearComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooYear");
-      yearComponent.SetupGet(x => x.ComponentIdentifier).Returns("Year");
-      monthComponent.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("FooMonth");
-      monthComponent.SetupGet(x => x.ComponentIdentifier).Returns("Month");
 
       CompositeMapping<DateTime> mapping = new CompositeMapping<DateTime>(parent.Object,
                                                                           Reflect.Property<Foo>(x => x.TestDateTime));
-      mapping.Components.Add("Year", yearComponent.Object);
-      mapping.Components.Add("Month", monthComponent.Object);
-      mapping.DeserializationFunction = dict => {
+      var yearComponent = new CompositeComponentMapping<DateTime>(mapping, "Year");
+      var monthComponent = new CompositeComponentMapping<DateTime>(mapping, "Month");
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("TestDateTime");
+
+      mapping.Components.Add("Year", yearComponent);
+      mapping.Components.Add("Month", monthComponent);
+      mapping.Parser = (IDictionary<object,string> components, out DateTime result) => {
         throw new Exception("This is a test exception");
       };
+      mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       IDictionary<string,string> data = new Dictionary<string, string>();
-      data.Add("FooYear", date.Year.ToString());
-      data.Add("FooMonth", date.Month.ToString());
+      data.Add("TestDateTimeYear", date.Year.ToString());
+      data.Add("TestDateTimeMonth", date.Month.ToString());
 
       DateTime output;
       bool success = mapping.Deserialize(data, out output, new int[0]);
@@ -387,8 +439,8 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [ExpectedException(ExceptionType = typeof(MandatorySerializationException))]
     public void TestDeserializeMandatoryFailure()
     {
-      var yearComponent = new Mock<ICompositeComponentMapping<DateTime>>();
-      var monthComponent = new Mock<ICompositeComponentMapping<DateTime>>();
+      var yearComponent = new Mock<CompositeComponentMapping<DateTime>>();
+      var monthComponent = new Mock<CompositeComponentMapping<DateTime>>();
       var parent = new Mock<IMapping>();
       DateTime date = DateTime.Today;
 

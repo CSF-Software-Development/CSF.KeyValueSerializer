@@ -12,79 +12,84 @@ namespace Test.CSF.KeyValueSerializer.MappingHelpers
   [Category("Public API")]
   public class TestClassMappingHelper
   {
+    #region fields
+
+    private ClassMapping<Foo> _fooMapping;
+    private ClassMapping<Bar> _barMapping;
+    private ClassMapping<Baz> _bazMapping;
+
+    #endregion
+
+    #region setup
+
+    [SetUp]
+    public void Setup()
+    {
+      _fooMapping = new ClassMapping<Foo>();
+      _barMapping = new ClassMapping<Bar>();
+      _bazMapping = new ClassMapping<Baz>();
+    }
+
+    #endregion
+
     #region general methods
 
     [Test]
     public void TestUsingFactory()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
 
       helper.UsingFactory(() => new Foo() { TestProperty = "This is a test" });
 
-      mapping.VerifySet(x => x.FactoryMethod = It.IsAny<Func<Foo>>());
+      Assert.IsInstanceOfType(typeof(Func<Foo>), _fooMapping.FactoryMethod, "Factory method is set.");
     }
 
     [Test]
     public void TestNamingPolicy()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
-      mapping.Setup(x => x.AttachKeyNamingPolicy<TestNamingPolicy>());
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
 
       helper.NamingPolicy<TestNamingPolicy>();
 
-      mapping.Verify(x => x.AttachKeyNamingPolicy<TestNamingPolicy>());
+      Assert.IsInstanceOfType(typeof(TestNamingPolicy), _fooMapping.KeyNamingPolicy, "Naming policy has been set.");
     }
 
     [Test]
     public void TestNamingPolicyWithFactory()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
-      mapping.Setup(x => x.AttachKeyNamingPolicy<TestNamingPolicy>(It.IsAny<Func<IMapping,TestNamingPolicy>>()));
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
 
       helper.NamingPolicy<TestNamingPolicy>(map => new TestNamingPolicy(map) { TestString = "Test!" });
 
-      mapping.Verify(x => x.AttachKeyNamingPolicy<TestNamingPolicy>(It.IsAny<Func<IMapping,TestNamingPolicy>>()));
+      Assert.IsInstanceOfType(typeof(TestNamingPolicy), _fooMapping.KeyNamingPolicy, "Naming policy has been set.");
     }
 
     #endregion
 
-    #region mapping the type itself
+    #region _mapping the type itself
 
     [Test]
     public void TestMapAsSimple()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-      mapping.Setup(x => x.ParentMapping);
-      mapping.Setup(x => x.Property);
-      mapping.SetupProperty(x => x.MapAs);
-
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
 
       var simple = helper.Simple();
 
-      Assert.IsNotNull(simple, "Simple mapping helper is not null");
-      Assert.IsNotNull(mapping.Object.MapAs, "Map-as of parent object is not null");
-      Assert.IsTrue(mapping.Object.MapAs is ISimpleMapping<Foo>, "Map-as is of correct type");
+      Assert.IsNotNull(simple, "Simple _mapping helper is not null");
+      Assert.IsNotNull(_fooMapping.MapAs, "Map-as of parent object is not null");
+      Assert.IsTrue(_fooMapping.MapAs is SimpleMapping<Foo>, "Map-as is of correct type");
     }
 
     [Test]
     public void TestMapAsComposite()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-      mapping.Setup(x => x.ParentMapping);
-      mapping.Setup(x => x.Property);
-      mapping.SetupProperty(x => x.MapAs);
-
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
 
       var composite = helper.Composite();
 
-      Assert.IsNotNull(composite, "Composite mapping helper is not null");
-      Assert.IsNotNull(mapping.Object.MapAs, "Map-as of parent object is not null");
-      Assert.IsTrue(mapping.Object.MapAs is ICompositeMapping<Foo>, "Map-as is of correct type");
+      Assert.IsNotNull(composite, "Composite _mapping helper is not null");
+      Assert.IsNotNull(_fooMapping.MapAs, "Map-as of parent object is not null");
+      Assert.IsTrue(_fooMapping.MapAs is CompositeMapping<Foo>, "Map-as is of correct type");
     }
 
     #endregion
@@ -94,95 +99,76 @@ namespace Test.CSF.KeyValueSerializer.MappingHelpers
     [Test]
     public void TestSimple()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-
-      mapping.SetupProperty(x => x.Mappings, new List<IMapping>());
-
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
       var simple = helper.Simple(x => x.TestInteger);
 
       Assert.IsNotNull(simple);
-      Assert.AreEqual(1, mapping.Object.Mappings.Count, "Correct count of contained mappings");
-      Assert.IsTrue(mapping.Object.Mappings.First() is ISimpleMapping<int>, "Mapping is of correct type");
+      Assert.AreEqual(1, _fooMapping.Mappings.Count, "Correct count of contained mappings");
+      Assert.IsInstanceOfType(typeof(SimpleMapping<int>), _fooMapping.Mappings.First(), "Mapping is of correct type");
     }
 
     [Test]
     public void TestSimpleTwice()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-
-      mapping.SetupProperty(x => x.Mappings, new List<IMapping>());
-
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
       var simple = helper.Simple(x => x.TestInteger);
       var simple2 = helper.Simple(x => x.TestInteger);
 
       Assert.IsNotNull(simple);
       Assert.IsNotNull(simple2);
       Assert.AreEqual(1,
-                      mapping.Object.Mappings.Count,
-                      "Correct count of contained mappings, only one mapping was created.");
-      Assert.IsTrue(mapping.Object.Mappings.First() is ISimpleMapping<int>, "Mapping is of correct type");
+                      _fooMapping.Mappings.Count,
+                      "Correct count of contained mappings, only one _mapping was created.");
+      Assert.IsInstanceOfType(typeof(SimpleMapping<int>), _fooMapping.Mappings.First(), "Mapping is of correct type");
     }
 
     [Test]
     public void TestComposite()
     {
-      var mapping = new Mock<IClassMapping<Foo>>();
-
-      mapping.SetupProperty(x => x.Mappings, new List<IMapping>());
-
-      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(mapping.Object);
+      ClassMappingHelper<Foo> helper = new ClassMappingHelper<Foo>(_fooMapping);
       var comp = helper.Composite(x => x.TestDateTime);
 
       Assert.IsNotNull(comp);
-      Assert.AreEqual(1, mapping.Object.Mappings.Count, "Correct count of contained mappings");
-      Assert.IsTrue(mapping.Object.Mappings.First() is ICompositeMapping<DateTime>, "Mapping is of correct type");
+      Assert.AreEqual(1, _fooMapping.Mappings.Count, "Correct count of contained mappings");
+      Assert.IsInstanceOfType(typeof(CompositeMapping<DateTime>),
+                              _fooMapping.Mappings.First(),
+                              "Mapping is of correct type");
     }
 
     [Test]
     public void TestCollection()
     {
-      var mapping = new Mock<IClassMapping<Baz>>();
-
-      mapping.SetupProperty(x => x.Mappings, new List<IMapping>());
-
-      ClassMappingHelper<Baz> helper = new ClassMappingHelper<Baz>(mapping.Object);
+      ClassMappingHelper<Baz> helper = new ClassMappingHelper<Baz>(_bazMapping);
       helper.Collection(x => x.TestCollection, m => {});
 
-      Assert.AreEqual(1, mapping.Object.Mappings.Count, "Correct count of contained mappings");
-      Assert.IsTrue(mapping.Object.Mappings.First() is IReferenceTypeCollectionMapping<Bar>,
-                    "Mapping is of correct type");
+      Assert.AreEqual(1, _bazMapping.Mappings.Count, "Correct count of contained mappings");
+      Assert.IsInstanceOfType(typeof(ReferenceTypeCollectionMapping<Bar>),
+                              _bazMapping.Mappings.First(),
+                              "Mapping is of correct type");
     }
 
     [Test]
     public void TestValueCollection()
     {
-      var mapping = new Mock<IClassMapping<Baz>>();
-
-      mapping.SetupProperty(x => x.Mappings, new List<IMapping>());
-
-      ClassMappingHelper<Baz> helper = new ClassMappingHelper<Baz>(mapping.Object);
+      ClassMappingHelper<Baz> helper = new ClassMappingHelper<Baz>(_bazMapping);
       helper.ValueCollection(x => x.TestValueCollection, m => {});
 
-      Assert.AreEqual(1, mapping.Object.Mappings.Count, "Correct count of contained mappings");
-      Assert.IsTrue(mapping.Object.Mappings.First() is IValueTypeCollectionMapping<DateTime>,
-                    "Mapping is of correct type");
+      Assert.AreEqual(1, _bazMapping.Mappings.Count, "Correct count of contained mappings");
+      Assert.IsInstanceOfType(typeof(ValueTypeCollectionMapping<DateTime>),
+                              _bazMapping.Mappings.First(),
+                              "Mapping is of correct type");
     }
 
     [Test]
     public void TestClass()
     {
-      var mapping = new Mock<IClassMapping<Bar>>();
-
-      mapping.SetupProperty(x => x.Mappings, new List<IMapping>());
-
-      ClassMappingHelper<Bar> helper = new ClassMappingHelper<Bar>(mapping.Object);
+      ClassMappingHelper<Bar> helper = new ClassMappingHelper<Bar>(_barMapping);
       helper.Class(x => x.Foo, m => {});
 
-      Assert.AreEqual(1, mapping.Object.Mappings.Count, "Correct count of contained mappings");
-      Assert.IsTrue(mapping.Object.Mappings.First() is IClassMapping<Foo>,
-                    "Mapping is of correct type");
+      Assert.AreEqual(1, _barMapping.Mappings.Count, "Correct count of contained mappings");
+      Assert.IsInstanceOfType(typeof(ClassMapping<Foo>),
+                              _barMapping.Mappings.First(),
+                              "Mapping is of correct type");
     }
 
     #endregion

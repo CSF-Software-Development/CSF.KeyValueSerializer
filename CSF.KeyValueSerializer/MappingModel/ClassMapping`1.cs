@@ -30,7 +30,7 @@ namespace CSF.KeyValueSerializer.MappingModel
   /// <summary>
   /// Default implementation of a class mapping.
   /// </summary>
-  public class ClassMapping<TValue> : MappingBase<TValue>, IClassMapping<TValue>
+  public class ClassMapping<TValue> : MappingBase<TValue>
     where TValue : class
   {
     #region fields

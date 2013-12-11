@@ -27,7 +27,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
   /// Mapping helper type for a collection of value-type items.
   /// </summary>
   public class ValueTypeCollectionMappingHelper<TObject,TCollectionItem>
-    : CollectionMappingHelper<IValueTypeCollectionMapping<TCollectionItem>>, IValueTypeCollectionMappingHelper<TObject,TCollectionItem>
+    : CollectionMappingHelper<ValueTypeCollectionMapping<TCollectionItem>>
     where TObject : class
     where TCollectionItem : struct
   {
@@ -36,7 +36,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <summary>
     ///  Maps the collection items as a simple value with its data contained in a single collection key. 
     /// </summary>
-    public ISimpleMappingHelper<TObject, TCollectionItem> Simple ()
+    public SimpleMappingHelper<TObject, TCollectionItem> Simple ()
     {
       var mapAs = new SimpleMapping<TCollectionItem>(this.Mapping, null);
       this.Mapping.MapAs = mapAs;
@@ -46,7 +46,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <summary>
     ///  Maps the collection items as a composite value, with data spread across multiple keys. 
     /// </summary>
-    public ICompositeMappingHelper<TObject, TCollectionItem> Composite ()
+    public CompositeMappingHelper<TObject, TCollectionItem> Composite ()
     {
       var mapAs = new CompositeMapping<TCollectionItem>(this.Mapping, null);
       this.Mapping.MapAs = mapAs;
@@ -62,7 +62,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public IValueTypeCollectionMappingHelper<TObject,TCollectionItem> CollectionNamingPolicy<TPolicy>()
+    public ValueTypeCollectionMappingHelper<TObject,TCollectionItem> CollectionNamingPolicy<TPolicy>()
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>();
@@ -81,7 +81,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public IValueTypeCollectionMappingHelper<TObject,TCollectionItem> CollectionNamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
+    public ValueTypeCollectionMappingHelper<TObject,TCollectionItem> CollectionNamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>(factoryMethod);
@@ -98,7 +98,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='mapping'>
     /// Mapping.
     /// </param>
-    public ValueTypeCollectionMappingHelper(IValueTypeCollectionMapping<TCollectionItem> mapping) : base(mapping) {}
+    public ValueTypeCollectionMappingHelper(ValueTypeCollectionMapping<TCollectionItem> mapping) : base(mapping) {}
 
     #endregion
   }

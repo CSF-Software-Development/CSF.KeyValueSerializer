@@ -29,7 +29,7 @@ namespace CSF.KeyValueSerializer.MappingModel
   /// A mapping implementation for mapping a value-type collection property.
   /// </summary>
   public class ValueTypeCollectionMapping<TItem>
-    : CollectionMapping<TItem>, IValueTypeCollectionMapping<TItem>
+    : CollectionMapping<TItem>
     where TItem : struct
   {
     #region properties
@@ -50,8 +50,8 @@ namespace CSF.KeyValueSerializer.MappingModel
         {
           throw new ArgumentNullException("value");
         }
-        else if(!(value is ISimpleMapping<TItem>)
-                && !(value is ICompositeMapping<TItem>))
+        else if(!(value is SimpleMapping<TItem>)
+                && !(value is CompositeMapping<TItem>))
         {
           throw new ArgumentException("Map-as must be an appropriate value-type mapping (IE: either a simple or " +
                                       "composite mapping).");

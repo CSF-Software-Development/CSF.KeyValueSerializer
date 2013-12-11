@@ -34,11 +34,11 @@ namespace CSF.KeyValueSerializer.MappingModel
   /// multiple keys.  Each of these pieces used is called a 'component'.
   /// </para>
   /// </remarks>
-  public class CompositeMapping<TValue> : MappingBase<TValue>, ICompositeMapping<TValue>
+  public class CompositeMapping<TValue> : MappingBase<TValue>
   {
     #region fields
 
-    private IDictionary<object, ICompositeComponentMapping<TValue>> _components;
+    private IDictionary<object, CompositeComponentMapping<TValue>> _components;
     private Func<IDictionary<object, string>, TValue> _deserializationFunction;
     private CompositeParser<TValue> _parser;
 
@@ -53,7 +53,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     /// A method body containing the deserialization function. 
     /// </value>
-    public Func<IDictionary<object, string>, TValue> DeserializationFunction
+    public virtual Func<IDictionary<object, string>, TValue> DeserializationFunction
     {
       get {
         return _deserializationFunction;
@@ -77,7 +77,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     /// The parser.
     /// </value>
-    public CompositeParser<TValue> Parser
+    public virtual CompositeParser<TValue> Parser
     {
       get {
         return _parser;
@@ -93,7 +93,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     ///  A collection of the components, indexed by their identifiers. 
     /// </value>
-    public IDictionary<object, ICompositeComponentMapping<TValue>> Components
+    public virtual IDictionary<object, CompositeComponentMapping<TValue>> Components
     {
       get {
         return _components;
@@ -190,7 +190,7 @@ namespace CSF.KeyValueSerializer.MappingModel
 
       this.Validate();
 
-      foreach(ICompositeComponentMapping<TValue> component in this.Components.Values)
+      foreach(CompositeComponentMapping<TValue> component in this.Components.Values)
       {
         string serialized = null;
 
@@ -321,7 +321,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     {
       _deserializationFunction = null;
       _parser = null;
-      _components = new Dictionary<object, ICompositeComponentMapping<TValue>>();
+      _components = new Dictionary<object, CompositeComponentMapping<TValue>>();
     }
 
     #endregion

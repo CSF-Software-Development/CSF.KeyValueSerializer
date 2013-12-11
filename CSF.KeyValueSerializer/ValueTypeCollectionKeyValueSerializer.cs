@@ -44,7 +44,7 @@ namespace CSF.KeyValueSerializer
     /// An action (possibly a pointer to a delegate or an anonymous method) that expresses the mappings to serialize
     /// and/or deserialize objects
     /// </param>
-    public void Map(Action<IValueTypeCollectionMappingHelper<ICollection<TOutput>, TOutput>> mappings)
+    public void Map(Action<ValueTypeCollectionMappingHelper<ICollection<TOutput>, TOutput>> mappings)
     {
       if(mappings == null)
       {

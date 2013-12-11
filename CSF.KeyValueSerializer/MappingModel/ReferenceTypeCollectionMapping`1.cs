@@ -29,7 +29,7 @@ namespace CSF.KeyValueSerializer.MappingModel
   /// A mapping implementation for mapping a reference-type collection property.
   /// </summary>
   public class ReferenceTypeCollectionMapping<TItem>
-    : CollectionMapping<TItem>, IReferenceTypeCollectionMapping<TItem>
+    : CollectionMapping<TItem>
     where TItem : class
   {
     #region properties
@@ -40,10 +40,10 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     /// The map-as mapping.
     /// </value>
-    public virtual IClassMapping<TItem> MapAs
+    public virtual ClassMapping<TItem> MapAs
     {
       get {
-        return (IClassMapping<TItem>) base.BaseMapAs;
+        return (ClassMapping<TItem>) base.BaseMapAs;
       }
       set {
         base.BaseMapAs = value;

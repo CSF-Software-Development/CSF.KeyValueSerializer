@@ -64,19 +64,19 @@ namespace Test.CSF.KeyValueSerializer
       });
 
       Assert.IsNotNull(serializer.RootMapping, "Root mapping not null");
-      Assert.IsInstanceOfType(typeof(IClassMapping<MockClass>),
+      Assert.IsInstanceOfType(typeof(ClassMapping<MockClass>),
                               serializer.RootMapping,
                               "Root mapping correct type");
       Assert.AreEqual(5,
-                      ((IClassMapping<MockClass>) serializer.RootMapping).Mappings.Count,
+                      ((ClassMapping<MockClass>) serializer.RootMapping).Mappings.Count,
                       "Correct count of mappings");
 
       var collectionOneProp = Reflect.Property<MockClass>(x => x.CollectionOne);
-      IClassMapping<MockClass> rootMapping = (IClassMapping<MockClass>) serializer.RootMapping;
+      ClassMapping<MockClass> rootMapping = (ClassMapping<MockClass>) serializer.RootMapping;
       Assert.AreEqual(1,
                       rootMapping.Mappings.Where(x => x.Property == collectionOneProp).Count(),
                       "Mapping present for collection one.");
-      Assert.IsInstanceOfType(typeof(IReferenceTypeCollectionMapping<string>),
+      Assert.IsInstanceOfType(typeof(ReferenceTypeCollectionMapping<string>),
                               rootMapping.Mappings.Where(x => x.Property == collectionOneProp).First(),
                               "Mapping for collection one is right type");
 
@@ -368,6 +368,8 @@ namespace Test.CSF.KeyValueSerializer
     }
 
     [Test]
+    [Ignore("This test is designed to illustrate issue #10 - it is ignored because that issue is not yet being " +
+            "worked upon.")]
     public void TestDeserializeNestedCommaSeparatedCollection()
     {
       var serializer = new ClassKeyValueSerializer<Baz>();

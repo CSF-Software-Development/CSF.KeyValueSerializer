@@ -25,11 +25,11 @@ namespace CSF.KeyValueSerializer.MappingModel
   /// <summary>
   /// Implementation of a mapping for a composite component.
   /// </summary>
-  public class CompositeComponentMapping<TValue> : ICompositeComponentMapping<TValue>
+  public class CompositeComponentMapping<TValue>
   {
     #region fields
 
-    private ICompositeMapping<TValue> _parentMapping;
+    private CompositeMapping<TValue> _parentMapping;
     private object _componentIdentifier;
     private Func<TValue, string> _serializationFunction;
     private SimpleRenderer<TValue> _renderer;
@@ -44,7 +44,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     ///  The parent mapping. 
     /// </value>
-    public ICompositeMapping<TValue> ParentMapping
+    public virtual CompositeMapping<TValue> ParentMapping
     {
       get {
         return _parentMapping;
@@ -65,7 +65,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     ///  The component identifier. 
     /// </value>
-    public object ComponentIdentifier
+    public virtual object ComponentIdentifier
     {
       get {
         return _componentIdentifier;
@@ -87,7 +87,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     /// A method body containing the serialization function. 
     /// </value>
-    public Func<TValue, string> SerializationFunction
+    public virtual Func<TValue, string> SerializationFunction
     {
       get {
         return _serializationFunction;
@@ -111,7 +111,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <value>
     /// The renderer.
     /// </value>
-    public SimpleRenderer<TValue> Renderer
+    public virtual SimpleRenderer<TValue> Renderer
     {
       get {
         return _renderer;
@@ -193,7 +193,7 @@ namespace CSF.KeyValueSerializer.MappingModel
     /// <param name='componentIdentifier'>
     /// Component identifier.
     /// </param>
-    public CompositeComponentMapping(ICompositeMapping<TValue> parentMapping, object componentIdentifier)
+    public CompositeComponentMapping(CompositeMapping<TValue> parentMapping, object componentIdentifier)
     {
       _serializationFunction = null;
       _renderer = null;

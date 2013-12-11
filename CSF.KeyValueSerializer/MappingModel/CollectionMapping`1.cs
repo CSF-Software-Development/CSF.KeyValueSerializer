@@ -234,15 +234,16 @@ namespace CSF.KeyValueSerializer.MappingModel
           string key = this.KeyNamingPolicy.GetKeyName(null);
           string aggregate = String.Empty;
           bool mandatoryFail = false;
-          ISimpleMapping<TItem> mapAs = (ISimpleMapping<TItem>) this.GetAggregateMapAs();
+          SimpleMapping<TItem> mapAs = (SimpleMapping<TItem>) this.GetAggregateMapAs();
 
           for(int currentIndex = 0; currentIndex < data.Count; currentIndex++)
           {
-            string value;
+            string value = null;
+            bool iterationSuccess = false;
 
             try
             {
-              value = mapAs.SerializationFunction(data.Skip(currentIndex).Take(1).First());
+              iterationSuccess = mapAs.Renderer(data.Skip(currentIndex).Take(1).First(), out value);
             }
             catch(Exception)
             {
@@ -253,7 +254,7 @@ namespace CSF.KeyValueSerializer.MappingModel
               continue;
             }
 
-            if(value == null)
+            if(!iterationSuccess)
             {
               if(mapAs.Mandatory)
               {
@@ -264,7 +265,7 @@ namespace CSF.KeyValueSerializer.MappingModel
             else
             {
               string separator = !String.IsNullOrEmpty(aggregate)? "," : String.Empty;
-              aggregate = String.Concat(aggregate, separator, value);
+              aggregate = String.Concat(aggregate, separator, value?? String.Empty);
             }
           }
 

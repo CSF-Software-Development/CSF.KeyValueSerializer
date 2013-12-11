@@ -458,19 +458,7 @@ namespace CSF.KeyValueSerializer.MappingModel
         throw new ArgumentNullException("mapping");
       }
 
-      ConstructorInfo ctor = typeof(TPolicy).GetConstructor(new Type[] { typeof(IMapping) });
-
-      if(ctor == null)
-      {
-        string message = String.Format("Cannot use the default factory method to initialise a key-naming-policy of " +
-                                       "type `{0}'.\nIn order to use the default factory method the naming policy " +
-                                       "type must expose a constructor that takes a single IMapping instance. " +
-                                       "Did you mean to provide a non-default factory method?",
-                                       typeof(TPolicy).FullName);
-        throw new InvalidOperationException(message);
-      }
-
-      return (TPolicy) ctor.Invoke(new object[] { mapping });
+      return (TPolicy) Activator.CreateInstance(typeof(TPolicy), new object[] { mapping });
     }
 
     /// <summary>

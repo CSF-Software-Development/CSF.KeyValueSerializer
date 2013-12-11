@@ -4,6 +4,7 @@ using Moq;
 using CSF.KeyValueSerializer.MappingHelpers;
 using CSF.KeyValueSerializer.MappingModel;
 using System.Collections.Generic;
+using CSF.Reflection;
 
 namespace Test.CSF.KeyValueSerializer.MappingHelpers
 {
@@ -14,15 +15,14 @@ namespace Test.CSF.KeyValueSerializer.MappingHelpers
     [Test]
     public void TestComponent()
     {
-      var mapping = new Mock<ICompositeMapping<DateTime>>();
+      var mapping = new CompositeMapping<DateTime>(new ClassMapping<Baz>(), Reflect.Property<Baz>(x => x.BazProperty));
 
-      mapping.SetupProperty(x => x.Components, new Dictionary<object, ICompositeComponentMapping<DateTime>>());
-      CompositeMappingHelper<Baz,DateTime> helper = new CompositeMappingHelper<Baz,DateTime>(mapping.Object);
+      CompositeMappingHelper<Baz,DateTime> helper = new CompositeMappingHelper<Baz,DateTime>(mapping);
 
       helper.Component("Year", m => {});
 
-      Assert.AreEqual(1, mapping.Object.Components.Count, "Correct count of composite mappings");
-      Assert.IsTrue(mapping.Object.Components.ContainsKey("Year"), "Component contained with correct key");
+      Assert.AreEqual(1, mapping.Components.Count, "Correct count of composite mappings");
+      Assert.IsTrue(mapping.Components.ContainsKey("Year"), "Component contained with correct key");
     }
   }
 }

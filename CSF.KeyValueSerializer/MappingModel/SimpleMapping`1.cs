@@ -27,7 +27,7 @@ namespace CSF.KeyValueSerializer.MappingModel
   /// <summary>
   /// Represents a simple value-to-property mapping.
   /// </summary>
-  public class SimpleMapping<TValue> : MappingBase<TValue>, ISimpleMapping<TValue>
+  public class SimpleMapping<TValue> : MappingBase<TValue>, ISimpleMapping
   {
     #region fields
 

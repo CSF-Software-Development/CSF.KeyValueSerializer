@@ -13,23 +13,17 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestConstructor()
     {
-      var rootMapping = new Mock<IClassMapping<Foo>>();
-      DefaultKeyNamingPolicy rule = new DefaultKeyNamingPolicy(rootMapping.Object);
+      var rootMapping = new ClassMapping<Foo>();
+      DefaultKeyNamingPolicy rule = new DefaultKeyNamingPolicy(rootMapping);
 
-      rootMapping.Setup(x => x.KeyNamingPolicy)
-        .Returns(rule);
-
-      Assert.AreSame(rootMapping.Object, rule.AssociatedMapping);
+      Assert.AreSame(rootMapping, rule.AssociatedMapping);
     }
 
     [Test]
     public void TestGetKeyNameEmpty()
     {
-      var rootMapping = new Mock<IClassMapping<Foo>>();
-      DefaultKeyNamingPolicy rule = new DefaultKeyNamingPolicy(rootMapping.Object);
-
-      rootMapping.Setup(x => x.KeyNamingPolicy)
-        .Returns(rule);
+      var rootMapping = new ClassMapping<Foo>();
+      DefaultKeyNamingPolicy rule = new DefaultKeyNamingPolicy(rootMapping);
 
       string name = rule.GetKeyName();
       Assert.IsNotNull(name);
@@ -39,23 +33,16 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestGetKeyNameProperty()
     {
-      var rootMapping = new Mock<IClassMapping<Foo>>();
-      var propertyMapping = new Mock<ISimpleMapping<string>>();
+      var rootMapping = new ClassMapping<Foo>();
       var prop = Reflect.Property<Foo>(x => x.TestProperty);
-
-      propertyMapping.Setup(x => x.Property)
-        .Returns(prop);
-      propertyMapping.Setup(x => x.ParentMapping)
-        .Returns(rootMapping.Object);
+      var propertyMapping = new SimpleMapping<string>(rootMapping, prop);
 
       DefaultKeyNamingPolicy
-        rootRule = new DefaultKeyNamingPolicy(rootMapping.Object),
-        propRule = new DefaultKeyNamingPolicy(propertyMapping.Object);
+        rootRule = new DefaultKeyNamingPolicy(rootMapping),
+        propRule = new DefaultKeyNamingPolicy(propertyMapping);
 
-      rootMapping.Setup(x => x.KeyNamingPolicy)
-        .Returns(rootRule);
-      propertyMapping.Setup(x => x.KeyNamingPolicy)
-        .Returns(propRule);
+      rootMapping.AttachKeyNamingPolicy(x => rootRule);
+      propertyMapping.AttachKeyNamingPolicy(x => propRule);
 
       string name = propRule.GetKeyName();
       Assert.IsNotNull(name);

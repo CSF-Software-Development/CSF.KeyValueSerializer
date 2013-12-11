@@ -27,7 +27,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
   /// <summary>
   /// Base mapping helper type.
   /// </summary>
-  public abstract class MappingHelper<TMapping> : IMappingHelper
+  public abstract class MappingHelper<TMapping>
     where TMapping : IMapping
   {
     #region fields

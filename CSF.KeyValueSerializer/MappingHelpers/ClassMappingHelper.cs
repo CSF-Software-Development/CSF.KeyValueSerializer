@@ -32,7 +32,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
   /// <summary>
   /// Implementation of a mapping helper for class objects.
   /// </summary>
-  public class ClassMappingHelper<TObject> : MappingHelper<IClassMapping<TObject>>, IClassMappingHelper<TObject>
+  public class ClassMappingHelper<TObject> : MappingHelper<ClassMapping<TObject>>
     where TObject : class
   {
     #region methods
@@ -58,7 +58,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public IClassMappingHelper<TObject> NamingPolicy<TPolicy>()
+    public ClassMappingHelper<TObject> NamingPolicy<TPolicy>()
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>();
@@ -77,7 +77,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public IClassMappingHelper<TObject> NamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
+    public ClassMappingHelper<TObject> NamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>(factoryMethod);
@@ -91,21 +91,21 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <summary>
     ///  Maps the class using an association with a single value within the collection. 
     /// </summary>
-    public ISimpleMappingHelper<TObject, TObject> Simple()
+    public SimpleMappingHelper<TObject, TObject> Simple()
     {
       this.Mapping.MapAs = new SimpleMapping<TObject>(this.Mapping, null);
 
-      return new SimpleMappingHelper<TObject, TObject>((ISimpleMapping<TObject>) this.Mapping.MapAs);
+      return new SimpleMappingHelper<TObject, TObject>((SimpleMapping<TObject>) this.Mapping.MapAs);
     }
 
     /// <summary>
     ///  Maps the class using an association with multiple values within the collection. 
     /// </summary>
-    public ICompositeMappingHelper<TObject, TObject> Composite()
+    public CompositeMappingHelper<TObject, TObject> Composite()
     {
       this.Mapping.MapAs = new CompositeMapping<TObject>(this.Mapping, null);
 
-      return new CompositeMappingHelper<TObject, TObject>((ICompositeMapping<TObject>) this.Mapping.MapAs);
+      return new CompositeMappingHelper<TObject, TObject>((CompositeMapping<TObject>) this.Mapping.MapAs);
     }
 
     #endregion
@@ -121,12 +121,12 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TValue'>
     ///  The type of the property's value. 
     /// </typeparam>
-    public ISimpleMappingHelper<TObject, TValue> Simple<TValue>(Expression<Func<TObject, TValue>> property)
+    public SimpleMappingHelper<TObject, TValue> Simple<TValue>(Expression<Func<TObject, TValue>> property)
     {
-      ISimpleMapping<TValue> mapping;
+      SimpleMapping<TValue> mapping;
       PropertyInfo prop = Reflect.Property<TObject,TValue>(property);
 
-      mapping = (ISimpleMapping<TValue>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
+      mapping = (SimpleMapping<TValue>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
       if(mapping == null)
       {
         mapping = new SimpleMapping<TValue>(this.Mapping, prop);
@@ -145,12 +145,12 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TValue'>
     ///  The type of the property's value. 
     /// </typeparam>
-    public ICompositeMappingHelper<TObject, TValue> Composite<TValue>(Expression<Func<TObject, TValue>> property)
+    public CompositeMappingHelper<TObject, TValue> Composite<TValue>(Expression<Func<TObject, TValue>> property)
     {
-      ICompositeMapping<TValue> mapping;
+      CompositeMapping<TValue> mapping;
       PropertyInfo prop = Reflect.Property<TObject,TValue>(property);
 
-      mapping = (ICompositeMapping<TValue>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
+      mapping = (CompositeMapping<TValue>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
       if(mapping == null)
       {
         mapping = new CompositeMapping<TValue>(this.Mapping, prop);
@@ -173,13 +173,13 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     ///  The type of the items within the collection. 
     /// </typeparam>
     public void Collection<TCollectionItem>(Expression<Func<TObject,ICollection<TCollectionItem>>> property,
-                                            Action<IReferenceTypeCollectionMappingHelper<TObject, TCollectionItem>> mapping)
+                                            Action<ReferenceTypeCollectionMappingHelper<TObject, TCollectionItem>> mapping)
       where TCollectionItem : class
     {
-      IReferenceTypeCollectionMapping<TCollectionItem> baseMapping;
+      ReferenceTypeCollectionMapping<TCollectionItem> baseMapping;
       PropertyInfo prop = Reflect.Property<TObject,ICollection<TCollectionItem>>(property);
 
-      baseMapping = (IReferenceTypeCollectionMapping<TCollectionItem>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
+      baseMapping = (ReferenceTypeCollectionMapping<TCollectionItem>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
       if(baseMapping == null)
       {
         baseMapping = new ReferenceTypeCollectionMapping<TCollectionItem>(this.Mapping, prop);
@@ -202,13 +202,13 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     ///  The type of the items within the collection. 
     /// </typeparam>
     public void ValueCollection<TCollectionItem>(Expression<Func<TObject,ICollection<TCollectionItem>>> property,
-                                                 Action<IValueTypeCollectionMappingHelper<TObject, TCollectionItem>> mapping)
+                                                 Action<ValueTypeCollectionMappingHelper<TObject, TCollectionItem>> mapping)
       where TCollectionItem : struct
     {
-      IValueTypeCollectionMapping<TCollectionItem> baseMapping;
+      ValueTypeCollectionMapping<TCollectionItem> baseMapping;
       PropertyInfo prop = Reflect.Property<TObject,ICollection<TCollectionItem>>(property);
 
-      baseMapping = (IValueTypeCollectionMapping<TCollectionItem>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
+      baseMapping = (ValueTypeCollectionMapping<TCollectionItem>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
       if(baseMapping == null)
       {
         baseMapping = new ValueTypeCollectionMapping<TCollectionItem>(this.Mapping, prop);
@@ -231,13 +231,13 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     ///  The type of the property that the new mappings will match to. 
     /// </typeparam>
     public void Class<TClass>(Expression<Func<TObject, TClass>> property,
-                              Action<IClassMappingHelper<TClass>> mapping)
+                              Action<ClassMappingHelper<TClass>> mapping)
       where TClass : class
     {
-      IClassMapping<TClass> baseMapping;
+      ClassMapping<TClass> baseMapping;
       PropertyInfo prop = Reflect.Property<TObject,TClass>(property);
 
-      baseMapping = (IClassMapping<TClass>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
+      baseMapping = (ClassMapping<TClass>) this.Mapping.Mappings.Where(x => x.Property == prop).FirstOrDefault();
       if(baseMapping == null)
       {
         baseMapping = new ClassMapping<TClass>(this.Mapping, prop);
@@ -257,7 +257,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='mapping'>
     /// Mapping.
     /// </param>
-    public ClassMappingHelper(IClassMapping<TObject> mapping) : base(mapping) {}
+    public ClassMappingHelper(ClassMapping<TObject> mapping) : base(mapping) {}
 
     #endregion
   }

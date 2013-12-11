@@ -27,8 +27,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
   /// <summary>
   /// Mapping helper for a simple value-to-property mapping.
   /// </summary>
-  public class SimpleMappingHelper<TObject,TValue>
-    : MappingHelper<ISimpleMapping<TValue>>, ISimpleMappingHelper<TObject,TValue>
+  public class SimpleMappingHelper<TObject,TValue> : MappingHelper<SimpleMapping<TValue>>
     where TObject : class
   {
     #region ISimpleMappingHelper implementation
@@ -39,7 +38,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='serializationFunction'>
     ///  A method body for serializing values. 
     /// </param>
-    public virtual ISimpleMappingHelper<TObject, TValue> Serialize(Func<TValue, string> serializationFunction)
+    public virtual SimpleMappingHelper<TObject, TValue> Serialize(Func<TValue, string> serializationFunction)
     {
       this.Mapping.SerializationFunction = serializationFunction;
       return this;
@@ -51,7 +50,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='deserializationFunction'>
     ///  A method body for deserializing values. 
     /// </param>
-    public virtual ISimpleMappingHelper<TObject, TValue> Deserialize(Func<string, TValue> deserializationFunction)
+    public virtual SimpleMappingHelper<TObject, TValue> Deserialize(Func<string, TValue> deserializationFunction)
     {
       this.Mapping.DeserializationFunction = deserializationFunction;
       return this;
@@ -63,7 +62,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='renderer'>
     ///  A method body for serializing values. 
     /// </param>
-    public virtual ISimpleMappingHelper<TObject, TValue> Render(SimpleRenderer<TValue> renderer)
+    public virtual SimpleMappingHelper<TObject, TValue> Render(SimpleRenderer<TValue> renderer)
     {
       this.Mapping.Renderer = renderer;
       return this;
@@ -75,7 +74,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='parser'>
     ///  A method body for deserializing values. 
     /// </param>
-    public virtual ISimpleMappingHelper<TObject, TValue> Parse(SimpleParser<TValue> parser)
+    public virtual SimpleMappingHelper<TObject, TValue> Parse(SimpleParser<TValue> parser)
     {
       this.Mapping.Parser = parser;
       return this;
@@ -90,7 +89,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public virtual ISimpleMappingHelper<TObject, TValue> NamingPolicy<TPolicy>()
+    public virtual SimpleMappingHelper<TObject, TValue> NamingPolicy<TPolicy>()
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>();
@@ -109,7 +108,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public virtual ISimpleMappingHelper<TObject, TValue> NamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
+    public virtual SimpleMappingHelper<TObject, TValue> NamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>(factoryMethod);
@@ -126,7 +125,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='mapping'>
     /// Mapping.
     /// </param>
-    public SimpleMappingHelper(ISimpleMapping<TValue> mapping) : base(mapping) {}
+    public SimpleMappingHelper(SimpleMapping<TValue> mapping) : base(mapping) {}
 
     #endregion
   }

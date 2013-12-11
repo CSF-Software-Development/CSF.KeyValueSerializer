@@ -4,6 +4,7 @@ using CSF.KeyValueSerializer.MappingModel;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
+using CSF.Reflection;
 
 namespace Test.CSF.KeyValueSerializer.MappingModel
 {
@@ -99,18 +100,22 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestSerializeAggregateKey()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
-        AggregateMapAs = mapAs.Object,
+        MapAs = mapAs,
+        AggregateMapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate
       };
 
-      mapAs.SetupGet(x => x.SerializationFunction).Returns(() => x => x.TestProperty);
+      mapAs.Renderer = (Foo input, out string output) => {
+        output = input.TestProperty;
+        return (input.TestProperty != null);
+      };
       namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
+      mapAs.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
 
       IDictionary<string,string>
         result = new Dictionary<string, string>();
@@ -176,20 +181,24 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestSerializeAggregateKeyWithFlag()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
-        AggregateMapAs = mapAs.Object,
+        MapAs = mapAs,
+        AggregateMapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
         FlagKey = "Flag",
         FlagValue = "!Flag Value!"
       };
 
-      mapAs.SetupGet(x => x.SerializationFunction).Returns(() => x => x.TestProperty);
+      mapAs.Renderer = (Foo input, out string output) => {
+        output = input.TestProperty;
+        return (input.TestProperty != null);
+      };
       namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
+      mapAs.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
 
       IDictionary<string,string>
         result = new Dictionary<string, string>();
@@ -255,19 +264,23 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestSerializeAggregateKeyMandatoryFailure()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
-        AggregateMapAs = mapAs.Object,
+        MapAs = mapAs,
+        AggregateMapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate
       };
 
-      mapAs.SetupGet(x => x.SerializationFunction).Returns(() => x => x.TestProperty);
-      mapAs.SetupGet(x => x.Mandatory).Returns(true);
+      mapAs.Renderer = (Foo input, out string output) => {
+        output = input.TestProperty;
+        return (input.TestProperty != null);
+      };
+      mapAs.Mandatory = true;
       namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
+      mapAs.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
 
       IDictionary<string,string>
         result = new Dictionary<string, string>();
@@ -288,27 +301,27 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestSerializeAggregateKeySerializationException()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       int callCount = 0;
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
-        AggregateMapAs = mapAs.Object,
+        MapAs = mapAs,
+        AggregateMapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate
       };
 
-      mapAs
-        .SetupGet(x => x.SerializationFunction)
-        .Callback(() => {
-          if(++callCount == 2)
-          {
-            throw new InvalidOperationException("An exception was raised by the serialization function");
-          }
-        })
-        .Returns(() => x => x.TestProperty);
+      mapAs.Renderer = (Foo input, out string output) => {
+        if(++callCount == 2)
+        {
+          throw new InvalidOperationException("An exception was raised by the serialization function");
+        }
+        output = input.TestProperty;
+        return (input.TestProperty != null);
+      };
       namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
+      mapAs.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
 
       IDictionary<string,string>
         result = new Dictionary<string, string>();
@@ -331,21 +344,23 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestSerializeAggregateKeyMissingValue()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
 
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
-        AggregateMapAs = mapAs.Object,
+        MapAs = mapAs,
+        AggregateMapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate
       };
 
-      mapAs
-        .SetupGet(x => x.SerializationFunction)
-        .Returns(() => x => x.TestProperty);
+      mapAs.Renderer = (Foo input, out string output) => {
+        output = input.TestProperty;
+        return (input.TestProperty != null);
+      };
       namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
+      mapAs.AttachKeyNamingPolicy<IKeyNamingPolicy>(x => { return namingPolicy.Object; });
 
       IDictionary<string,string>
         result = new Dictionary<string, string>();
@@ -438,24 +453,26 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAggregateKey()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
+        MapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
-        AggregateMapAs = mapAs.Object
+        AggregateMapAs = mapAs
       };
 
       IDictionary<string,string> collection = new Dictionary<string, string>();
       collection.Add("Foo", "1,2,3");
-      object testOutput = new Foo() { TestInteger = 0 };
+      Foo testOutput = new Foo() { TestInteger = 0 };
 
-      mapAs
-        .Setup(x => x.Deserialize(It.IsAny<IDictionary<string,string>>(), out testOutput, null))
-        .Returns(true);
-      namingPolicy.Setup(x => x.GetKeyName(null)).Returns("Foo");
+      mapAs.Parser = (string input, out Foo result) => {
+        result = testOutput;
+        return true;
+      };
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapAs.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       ICollection<Foo> output;
       bool success = mapping.Deserialize(collection, out output, new int[0]);
@@ -504,13 +521,12 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAggregateKeyFlagFailure()
     {
-
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
+        MapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
-        AggregateMapAs = mapAs.Object,
+        AggregateMapAs = mapAs,
         FlagKey = "flag",
         FlagValue = "specific"
       };
@@ -518,14 +534,16 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
       IDictionary<string,string> collection = new Dictionary<string, string>();
       collection.Add("flag", "wrong");
       collection.Add("Foo", "1,2,3");
-      object testOutput = new Foo() { TestInteger = 0 };
+      Foo testOutput = new Foo() { TestInteger = 0 };
 
-      mapAs
-        .Setup(x => x.Deserialize(It.IsAny<IDictionary<string,string>>(), out testOutput, null))
-        .Returns(true);
-      namingPolicy.Setup(x => x.GetKeyName(null)).Returns("Foo");
+      mapAs.Parser = (string input, out Foo result) => {
+        result = testOutput;
+        return true;
+      };
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapAs.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       ICollection<Foo> output;
       bool success = mapping.Deserialize(collection, out output, new int[0]);
@@ -576,12 +594,12 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAggregateKeyFlagSuccess()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
+        MapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
-        AggregateMapAs = mapAs.Object,
+        AggregateMapAs = mapAs,
         FlagKey = "flag",
         FlagValue = "specific"
       };
@@ -589,14 +607,16 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
       IDictionary<string,string> collection = new Dictionary<string, string>();
       collection.Add("flag", "specific");
       collection.Add("Foo", "1,2,3");
-      object testOutput = new Foo() { TestInteger = 0 };
+      Foo testOutput = new Foo() { TestInteger = 0 };
 
-      mapAs
-        .Setup(x => x.Deserialize(It.IsAny<IDictionary<string,string>>(), out testOutput, null))
-        .Returns(true);
-      namingPolicy.Setup(x => x.GetKeyName(null)).Returns("Foo");
+      mapAs.Parser = (string input, out Foo result) => {
+        result = testOutput;
+        return true;
+      };
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapAs.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       ICollection<Foo> output;
       bool success = mapping.Deserialize(collection, out output, new int[0]);
@@ -642,24 +662,24 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAggregateKeyMandatoryFailure()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
+        MapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
-        AggregateMapAs = mapAs.Object
+        AggregateMapAs = mapAs
       };
 
       IDictionary<string,string> collection = new Dictionary<string, string>();
       collection.Add("Foo", "1,2,3");
-      object testOutput = new Foo() { TestInteger = 0 };
 
-      mapAs
-        .Setup(x => x.Deserialize(It.IsAny<IDictionary<string,string>>(), out testOutput, null))
-        .Throws(new MandatorySerializationException(mapAs.Object));
-      namingPolicy.Setup(x => x.GetKeyName(null)).Returns("Foo");
+      mapAs.Parser = (string input, out Foo result) => {
+        throw new MandatorySerializationException(mapAs);
+      };
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapAs.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       ICollection<Foo> output;
       bool success = mapping.Deserialize(collection, out output, new int[0]);
@@ -705,31 +725,31 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAggregateKeyException()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
+        MapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
-        AggregateMapAs = mapAs.Object
+        AggregateMapAs = mapAs
       };
 
       IDictionary<string,string> collection = new Dictionary<string, string>();
       collection.Add("Foo", "1,2,3");
-      object testOutput = new Foo() { TestInteger = 0 };
+      Foo testOutput = new Foo() { TestInteger = 0 };
       int testCount = 0;
 
-      mapAs
-        .Setup(x => x.Deserialize(It.IsAny<IDictionary<string,string>>(), out testOutput, null))
-        .Callback(() => {
-          if(++testCount == 2)
-          {
-            throw new InvalidOperationException();
-          }
-        })
-        .Returns(true);
-      namingPolicy.Setup(x => x.GetKeyName(null)).Returns("Foo");
+      mapAs.Parser = (string input, out Foo result) => {
+        result = testOutput;
+        if(++testCount == 2)
+        {
+          throw new InvalidOperationException();
+        }
+        return true;
+      };
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapAs.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       ICollection<Foo> output;
       bool success = mapping.Deserialize(collection, out output, new int[0]);
@@ -775,24 +795,26 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAggregateKeyNoItems()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
+        MapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
-        AggregateMapAs = mapAs.Object
+        AggregateMapAs = mapAs
       };
 
       IDictionary<string,string> collection = new Dictionary<string, string>();
       collection.Add("Foo", String.Empty);
-      object testOutput = new Foo() { TestInteger = 0 };
+      Foo testOutput = new Foo() { TestInteger = 0 };
 
-      mapAs
-        .Setup(x => x.Deserialize(It.IsAny<IDictionary<string,string>>(), out testOutput, null))
-        .Returns(true);
-      namingPolicy.Setup(x => x.GetKeyName(null)).Returns("Foo");
+      mapAs.Parser = (string input, out Foo result) => {
+        result = testOutput;
+        return true;
+      };
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapAs.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       ICollection<Foo> output;
       bool success = mapping.Deserialize(collection, out output, new int[0]);
@@ -805,23 +827,25 @@ namespace Test.CSF.KeyValueSerializer.MappingModel
     [Test]
     public void TestDeserializeAggregateKeyKeyNotPresent()
     {
-      var mapAs = new Mock<ISimpleMapping<Foo>>();
+      var mapAs = new SimpleMapping<Foo>(new Mock<IMapping>().Object, Reflect.Property<Bar>(x => x.Foo));
       var namingPolicy = new Mock<IKeyNamingPolicy>();
       CollectionMapping<Foo> mapping = new StubCollectionMapping() {
-        MapAs = mapAs.Object,
+        MapAs = mapAs,
         CollectionKeyType = CollectionKeyType.Aggregate,
-        AggregateMapAs = mapAs.Object
+        AggregateMapAs = mapAs
       };
 
       IDictionary<string,string> collection = new Dictionary<string, string>();
-      object testOutput = new Foo() { TestInteger = 0 };
+      Foo testOutput = new Foo() { TestInteger = 0 };
 
-      mapAs
-        .Setup(x => x.Deserialize(It.IsAny<IDictionary<string,string>>(), out testOutput, null))
-        .Returns(true);
-      namingPolicy.Setup(x => x.GetKeyName(null)).Returns("Foo");
+      mapAs.Parser = (string input, out Foo result) => {
+        result = testOutput;
+        return true;
+      };
+      namingPolicy.Setup(x => x.GetKeyName(It.IsAny<int[]>())).Returns("Foo");
 
       mapping.AttachKeyNamingPolicy(x => namingPolicy.Object);
+      mapAs.AttachKeyNamingPolicy(x => namingPolicy.Object);
 
       ICollection<Foo> output;
       bool success = mapping.Deserialize(collection, out output, new int[0]);

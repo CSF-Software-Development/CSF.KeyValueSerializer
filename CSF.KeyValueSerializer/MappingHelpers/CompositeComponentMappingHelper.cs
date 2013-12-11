@@ -26,12 +26,12 @@ namespace CSF.KeyValueSerializer.MappingHelpers
   /// <summary>
   /// Mapping helper for a single component of a composite mapping.
   /// </summary>
-  public class CompositeComponentMappingHelper<TObject,TValue> : ICompositeComponentMappingHelper<TObject,TValue>
+  public class CompositeComponentMappingHelper<TObject,TValue>
     where TObject : class
   {
     #region fields
 
-    private ICompositeComponentMapping<TValue> _mapping;
+    private CompositeComponentMapping<TValue> _mapping;
 
     #endregion
 
@@ -43,7 +43,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <value>
     /// The mapping.
     /// </value>
-    public ICompositeComponentMapping<TValue> Mapping
+    public CompositeComponentMapping<TValue> Mapping
     {
       get {
         return _mapping;
@@ -94,7 +94,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='mapping'>
     /// Mapping.
     /// </param>
-    public CompositeComponentMappingHelper(ICompositeComponentMapping<TValue> mapping)
+    public CompositeComponentMappingHelper(CompositeComponentMapping<TValue> mapping)
     {
       this.Mapping = mapping;
     }

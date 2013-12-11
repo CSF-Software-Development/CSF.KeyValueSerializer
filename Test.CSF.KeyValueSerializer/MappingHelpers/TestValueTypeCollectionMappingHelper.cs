@@ -15,27 +15,25 @@ namespace Test.CSF.KeyValueSerializer.MappingHelpers
     [Test]
     public void TestSimple()
     {
-      var mapping = new Mock<IValueTypeCollectionMapping<DateTime>>();
-      mapping.SetupProperty(x => x.MapAs);
-      ValueTypeCollectionMappingHelper<Bar,DateTime> helper = new ValueTypeCollectionMappingHelper<Bar,DateTime>(mapping.Object);
+      var mapping = new ValueTypeCollectionMapping<DateTime>();
+      ValueTypeCollectionMappingHelper<Bar,DateTime> helper = new ValueTypeCollectionMappingHelper<Bar,DateTime>(mapping);
 
       helper.Simple();
 
-      Assert.IsNotNull(mapping.Object.MapAs, "Map-as not null");
-      Assert.IsInstanceOfType(typeof(ISimpleMapping<DateTime>), mapping.Object.MapAs, "Correct type");
+      Assert.IsNotNull(mapping.MapAs, "Map-as not null");
+      Assert.IsInstanceOfType(typeof(SimpleMapping<DateTime>), mapping.MapAs, "Correct type");
     }
 
     [Test]
     public void TestComposite()
     {
-      var mapping = new Mock<IValueTypeCollectionMapping<DateTime>>();
-      mapping.SetupProperty(x => x.MapAs);
-      ValueTypeCollectionMappingHelper<Bar,DateTime> helper = new ValueTypeCollectionMappingHelper<Bar,DateTime>(mapping.Object);
+      var mapping = new ValueTypeCollectionMapping<DateTime>();
+      ValueTypeCollectionMappingHelper<Bar,DateTime> helper = new ValueTypeCollectionMappingHelper<Bar,DateTime>(mapping);
 
       helper.Composite();
 
-      Assert.IsNotNull(mapping.Object.MapAs, "Map-as not null");
-      Assert.IsInstanceOfType(typeof(ICompositeMapping<DateTime>), mapping.Object.MapAs, "Correct type");
+      Assert.IsNotNull(mapping.MapAs, "Map-as not null");
+      Assert.IsInstanceOfType(typeof(CompositeMapping<DateTime>), mapping.MapAs, "Correct type");
     }
   }
 }

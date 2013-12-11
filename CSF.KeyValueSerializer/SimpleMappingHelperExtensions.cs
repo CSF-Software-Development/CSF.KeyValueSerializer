@@ -23,7 +23,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TObject'>
     /// The type of the reference type object being deserialized.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,string> DeserializeAsString<TObject>(this ISimpleMappingHelper<TObject,string> helper)
+    public static SimpleMappingHelper<TObject,string> DeserializeAsString<TObject>(this SimpleMappingHelper<TObject,string> helper)
       where TObject : class
     {
       return helper.Deserialize(val => val);
@@ -41,7 +41,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TObject'>
     /// The type of the reference type object being deserialized.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,int> DeserializeAsInt32<TObject>(this ISimpleMappingHelper<TObject,int> helper)
+    public static SimpleMappingHelper<TObject,int> DeserializeAsInt32<TObject>(this SimpleMappingHelper<TObject,int> helper)
       where TObject : class
     {
       return helper.Deserialize(val => Int32.Parse(val));
@@ -59,7 +59,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TObject'>
     /// The type of the reference type object being deserialized.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,short> DeserializeAsInt16<TObject>(this ISimpleMappingHelper<TObject,short> helper)
+    public static SimpleMappingHelper<TObject,short> DeserializeAsInt16<TObject>(this SimpleMappingHelper<TObject,short> helper)
       where TObject : class
     {
       return helper.Deserialize(val => Int16.Parse(val));
@@ -77,7 +77,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TObject'>
     /// The type of the reference type object being deserialized.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,long> DeserializeAsInt64<TObject>(this ISimpleMappingHelper<TObject,long> helper)
+    public static SimpleMappingHelper<TObject,long> DeserializeAsInt64<TObject>(this SimpleMappingHelper<TObject,long> helper)
       where TObject : class
     {
       return helper.Deserialize(val => Int64.Parse(val));
@@ -95,7 +95,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TObject'>
     /// The type of the reference type object being deserialized.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,uint> DeserializeAsUInt32<TObject>(this ISimpleMappingHelper<TObject,uint> helper)
+    public static SimpleMappingHelper<TObject,uint> DeserializeAsUInt32<TObject>(this SimpleMappingHelper<TObject,uint> helper)
       where TObject : class
     {
       return helper.Deserialize(val => UInt32.Parse(val));
@@ -113,7 +113,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TObject'>
     /// The type of the reference type object being deserialized.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,ushort> DeserializeAsUInt16<TObject>(this ISimpleMappingHelper<TObject,ushort> helper)
+    public static SimpleMappingHelper<TObject,ushort> DeserializeAsUInt16<TObject>(this SimpleMappingHelper<TObject,ushort> helper)
       where TObject : class
     {
       return helper.Deserialize(val => UInt16.Parse(val));
@@ -131,7 +131,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TObject'>
     /// The type of the reference type object being deserialized.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,ulong> DeserializeAsUInt64<TObject>(this ISimpleMappingHelper<TObject,ulong> helper)
+    public static SimpleMappingHelper<TObject,ulong> DeserializeAsUInt64<TObject>(this SimpleMappingHelper<TObject,ulong> helper)
       where TObject : class
     {
       return helper.Deserialize(val => UInt64.Parse(val));
@@ -152,7 +152,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TValue'>
     /// The type of enumeration to deserialize.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,TValue> DeserializeAsEnum<TObject,TValue>(this ISimpleMappingHelper<TObject,TValue> helper)
+    public static SimpleMappingHelper<TObject,TValue> DeserializeAsEnum<TObject,TValue>(this SimpleMappingHelper<TObject,TValue> helper)
       where TObject : class
       where TValue : struct
     {
@@ -174,7 +174,7 @@ namespace CSF.KeyValueSerializer
     /// <typeparam name='TEntity'>
     /// The type of entity for which an identity is desired.
     /// </typeparam>
-    public static ISimpleMappingHelper<TObject,IIdentity<TEntity>> DeserializeAsIdentity<TObject,TEntity>(this ISimpleMappingHelper<TObject,IIdentity<TEntity>> helper)
+    public static SimpleMappingHelper<TObject,IIdentity<TEntity>> DeserializeAsIdentity<TObject,TEntity>(this SimpleMappingHelper<TObject,IIdentity<TEntity>> helper)
       where TObject : class
       where TEntity : IEntity
     {

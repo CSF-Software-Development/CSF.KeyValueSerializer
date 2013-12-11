@@ -27,8 +27,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
   /// <summary>
   /// Mapping helper for composite many-keys-to-one-property mappings.
   /// </summary>
-  public class CompositeMappingHelper<TObject,TValue>
-    : MappingHelper<ICompositeMapping<TValue>>, ICompositeMappingHelper<TObject,TValue>
+  public class CompositeMappingHelper<TObject,TValue> : MappingHelper<CompositeMapping<TValue>>
     where TObject : class
   {
     #region ICompositeMappingHelper implementation
@@ -42,7 +41,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public ICompositeMappingHelper<TObject,TValue> NamingPolicy<TPolicy>()
+    public CompositeMappingHelper<TObject,TValue> NamingPolicy<TPolicy>()
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>();
@@ -61,7 +60,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <typeparam name='TPolicy'>
     /// The type of <see cref="IKeyNamingPolicy"/> desired.
     /// </typeparam>
-    public ICompositeMappingHelper<TObject,TValue> NamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
+    public CompositeMappingHelper<TObject,TValue> NamingPolicy<TPolicy>(Func<IMapping,TPolicy> factoryMethod)
       where TPolicy : IKeyNamingPolicy
     {
       this.Mapping.AttachKeyNamingPolicy<TPolicy>(factoryMethod);
@@ -78,15 +77,15 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='mappingMethod'>
     ///  A method body that indicates how the component should be mapped. 
     /// </param>
-    public ICompositeMappingHelper<TObject, TValue> Component (object identifier,
-                                                               Action<ICompositeComponentMappingHelper<TObject, TValue>> mappingMethod)
+    public CompositeMappingHelper<TObject, TValue> Component (object identifier,
+                                                               Action<CompositeComponentMappingHelper<TObject, TValue>> mappingMethod)
     {
       if(!this.Mapping.Components.ContainsKey(identifier))
       {
         this.Mapping.Components[identifier] = new CompositeComponentMapping<TValue>(this.Mapping, identifier);
       }
 
-      ICompositeComponentMappingHelper<TObject,TValue> helper;
+      CompositeComponentMappingHelper<TObject,TValue> helper;
       helper = new CompositeComponentMappingHelper<TObject, TValue>(this.Mapping.Components[identifier]);
       mappingMethod(helper);
 
@@ -99,7 +98,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='deserializationFunction'>
     ///  A method body containing the deserialization function. 
     /// </param>
-    public ICompositeMappingHelper<TObject, TValue> Deserialize (Func<IDictionary<object, string>, TValue> deserializationFunction)
+    public CompositeMappingHelper<TObject, TValue> Deserialize (Func<IDictionary<object, string>, TValue> deserializationFunction)
     {
       this.Mapping.DeserializationFunction = deserializationFunction;
       return this;
@@ -111,7 +110,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='parser'>
     ///  A method body containing the deserialization function. 
     /// </param>
-    public ICompositeMappingHelper<TObject, TValue> Parse (CompositeParser<TValue> parser)
+    public CompositeMappingHelper<TObject, TValue> Parse (CompositeParser<TValue> parser)
     {
       this.Mapping.Parser = parser;
       return this;
@@ -127,7 +126,7 @@ namespace CSF.KeyValueSerializer.MappingHelpers
     /// <param name='mapping'>
     /// Mapping.
     /// </param>
-    public CompositeMappingHelper(ICompositeMapping<TValue> mapping) : base(mapping) {}
+    public CompositeMappingHelper(CompositeMapping<TValue> mapping) : base(mapping) {}
 
     #endregion
   }

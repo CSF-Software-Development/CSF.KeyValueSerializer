@@ -43,7 +43,7 @@ namespace CSF.KeyValueSerializer
     /// An action (possibly a pointer to a delegate or an anonymous method) that expresses the mappings to serialize
     /// and/or deserialize objects
     /// </param>
-    void Map(Action<IClassMappingHelper<TOutput>> mappings);
+    void Map(Action<ClassMappingHelper<TOutput>> mappings);
   }
 }
 
