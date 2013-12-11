@@ -8,6 +8,7 @@ using System.Collections.Generic;
 namespace Test.CSF.KeyValueSerializer.MappingHelpers
 {
   [TestFixture]
+  [Category("Public API")]
   public class TestCompositeMappingHelper
   {
     [Test]

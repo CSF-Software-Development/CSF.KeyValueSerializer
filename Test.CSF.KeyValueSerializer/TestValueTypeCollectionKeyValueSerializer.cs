@@ -7,6 +7,8 @@ using System.Linq;
 namespace Test.CSF.KeyValueSerializer
 {
   [TestFixture]
+  [Category("Integration")]
+  [Category("Public API")]
   public class TestValueTypeCollectionKeyValueSerializer
   {
     [Test]

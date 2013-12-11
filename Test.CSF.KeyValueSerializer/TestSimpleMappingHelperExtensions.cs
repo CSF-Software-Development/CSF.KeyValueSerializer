@@ -9,6 +9,7 @@ using CSF.Entities;
 namespace Test.CSF.KeyValueSerializer
 {
   [TestFixture]
+  [Category("Public API")]
   public class TestSimpleMappingHelperExtensions
   {
     [Test]

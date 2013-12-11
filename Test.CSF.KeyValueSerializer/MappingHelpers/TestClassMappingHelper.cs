@@ -9,6 +9,7 @@ using System.Linq;
 namespace Test.CSF.KeyValueSerializer.MappingHelpers
 {
   [TestFixture]
+  [Category("Public API")]
   public class TestClassMappingHelper
   {
     #region general methods

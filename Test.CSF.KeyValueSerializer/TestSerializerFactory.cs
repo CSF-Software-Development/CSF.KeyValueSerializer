@@ -6,6 +6,7 @@ using Moq;
 namespace Test.CSF.KeyValueSerializer
 {
   [TestFixture]
+  [Category("Public API")]
   public class TestSerializerFactory
   {
     #region testing simple creation of serializers
